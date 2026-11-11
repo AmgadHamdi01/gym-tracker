@@ -107,7 +107,7 @@
                 <div>
                     <h2 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
                         GymTracker Pro
-                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v4.6</span>
+                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v5.0</span>
                     </h2>
                     <p class="text-xs text-gray-400" id="user-display-email">athlete@gmail.com</p>
                 </div>
@@ -131,7 +131,7 @@
                 <i class="fa-solid fa-calculator"></i> BMR & TDEE Calculator
             </button>
             <button onclick="switchPage('ai-macro')" id="nav-ai-macro" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap">
-                <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> AI Macro Scanner
+                <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> Gemini AI Scanner
             </button>
         </nav>
 
@@ -287,14 +287,14 @@
                 </div>
             </section>
 
-            <!-- PAGE 4: AI MACRO & IMAGE SCANNER -->
+            <!-- PAGE 4: GEMINI AI MACRO & IMAGE SCANNER -->
             <section id="page-ai-macro" class="page-content hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl">
                         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> AI Macro & Image Scanner
+                            <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> Gemini AI Scanner
                         </h3>
-                        <p class="text-sm text-gray-400">Describe your meal or upload a meal photo to calculate accurate calories and macros.</p>
+                        <p class="text-sm text-gray-400">Describe your meal or upload a meal photo. Real Gemini AI will analyze and calculate exact macros.</p>
                         
                         <!-- Image Upload Box -->
                         <div class="border-2 border-dashed border-bordercolor rounded-xl p-4 text-center hover:border-primary transition-colors cursor-pointer relative" onclick="document.getElementById('meal-image-input').click()">
@@ -311,11 +311,13 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Or Type Description</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Or Type Meal Description</label>
                             <textarea id="ai-food-prompt" placeholder="e.g. 200g chicken breast, 150g white rice..." class="w-full bg-darkbg border border-bordercolor rounded-xl p-4 text-sm text-white h-24 focus:outline-none focus:border-primary"></textarea>
                         </div>
 
-                        <button onclick="analyzeMealWithAI()" class="bg-primary text-black font-bold py-3.5 w-full rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-wider text-sm shadow-lg shadow-primary/20">Scan Macros</button>
+                        <button onclick="analyzeMealWithGeminiAI()" id="gemini-scan-btn" class="bg-primary text-black font-bold py-3.5 w-full rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-wider text-sm shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bolt"></i> Scan with Gemini AI
+                        </button>
 
                         <div id="ai-result-card" class="hidden bg-darkbg/80 border border-bordercolor p-4 rounded-xl space-y-3">
                             <div class="flex justify-between items-center border-b border-bordercolor pb-2">
@@ -371,8 +373,8 @@
                             </div>
 
                             <div class="space-y-3">
-                                <h5 class="text-xs uppercase font-bold tracking-wider text-gray-400">Logged Food Items:</h5>
-                                <div id="daily-food-list" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar pr-1">
+                                <h5 class="text-xs uppercase font-bold tracking-wider text-gray-400">Logged Food Items (Edit grams anytime):</h5>
+                                <div id="daily-food-list" class="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-1">
                                     <div class="text-center py-8 text-gray-500 text-xs">No food items logged today yet.</div>
                                 </div>
                             </div>
@@ -389,6 +391,9 @@
         let currentScannedFood = null;
         let uploadedMealImage = null;
 
+        // MASTER GEMINI API KEY EMBEDDED FOR ALL USERS
+        const MASTER_GEMINI_API_KEY = "AQ.Ab8RN6KAhyTzd2mt4AU1mfGgAQcO2Fi8RUM71KUiNhuirWFaYA";
+
         function showToast(msg) {
             const container = document.getElementById('toast-container');
             const t = document.createElement('div');
@@ -397,6 +402,17 @@
             container.appendChild(t);
             setTimeout(() => t.remove(), 3000);
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('gym_current_session');
+            if (saved) {
+                let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+                if (usersDb[saved]) {
+                    currentUser = saved;
+                    initAppSession();
+                }
+            }
+        });
 
         function switchAuthTab(mode) {
             authMode = mode;
@@ -415,7 +431,6 @@
             }
         }
 
-        // FIXED AUTH HANDLER WITH ROBUST REGISTRATION & ERROR HANDLING
         function handleAuthSubmit(e) {
             e.preventDefault();
             const emailInput = document.getElementById('auth-email');
@@ -488,17 +503,6 @@
             document.getElementById('app-wrapper').classList.add('hidden');
             document.getElementById('auth-view').classList.remove('hidden');
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('gym_current_session');
-            if (saved) {
-                let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
-                if (usersDb[saved]) {
-                    currentUser = saved;
-                    initAppSession();
-                }
-            }
-        });
 
         function switchPage(pageId) {
             document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
@@ -596,6 +600,7 @@
             if(exercises.length === 0) { alert("Please add at least one exercise with sets."); return; }
             
             let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            if(!usersDb[currentUser]) usersDb[currentUser] = { workouts: [], foodLogs: [] };
             if(!usersDb[currentUser].workouts) usersDb[currentUser].workouts = [];
             usersDb[currentUser].workouts.push({ id: Date.now(), tag, date, notes, exercises });
             localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
@@ -734,61 +739,98 @@
             reader.readAsDataURL(file);
         }
 
-        function analyzeMealWithAI() {
-            const prompt = document.getElementById('ai-food-prompt').value.trim().toLowerCase();
-            if(!prompt && !uploadedMealImage) { alert("Please describe your meal or upload a photo."); return; }
+        // REAL GEMINI AI INTEGRATION WITH MASTER KEY
+        async function analyzeMealWithGeminiAI() {
+            const apiKey = MASTER_GEMINI_API_KEY;
 
-            let grams = 100;
-            let p = 0, c = 0, f = 0, cals = 0;
-            let itemName = prompt || "Scanned Meal Photo";
-
-            const gramMatch = prompt.match(/(\d+)\s*g/);
-            if (gramMatch) {
-                grams = parseInt(gramMatch[1]);
+            const promptText = document.getElementById('ai-food-prompt').value.trim();
+            if(!promptText && !uploadedMealImage) {
+                alert("Please describe your meal or upload a photo.");
+                return;
             }
 
-            if (prompt.includes('chicken') || prompt.includes('فراخ') || prompt.includes('دجاج')) {
-                p = (31 / 100) * grams; c = 0; f = (3.6 / 100) * grams; cals = (165 / 100) * grams;
-                itemName = `${grams}g Chicken Breast`;
-            } 
-            else if (prompt.includes('rice') || prompt.includes('رز') || prompt.includes('أرز')) {
-                p = (2.7 / 100) * grams; c = (28 / 100) * grams; f = (0.3 / 100) * grams; cals = (130 / 100) * grams;
-                itemName = `${grams}g White Rice`;
-            }
-            else if (prompt.includes('egg') || prompt.includes('بيض')) {
-                p = (13 / 100) * grams; c = (0.7 / 100) * grams; f = (9.5 / 100) * grams; cals = (143 / 100) * grams;
-                itemName = `${grams}g Eggs`;
-            }
-            else if (prompt.includes('meat') || prompt.includes('beef') || prompt.includes('لحم')) {
-                p = (26 / 100) * grams; c = 0; f = (15 / 100) * grams; cals = (250 / 100) * grams;
-                itemName = `${grams}g Lean Beef`;
-            }
-            else if (prompt.includes('oats') || prompt.includes('شوفان')) {
-                p = (16.9 / 100) * grams; c = (66 / 100) * grams; f = (6.9 / 100) * grams; cals = (389 / 100) * grams;
-                itemName = `${grams}g Oats`;
-            }
-            else {
-                p = 35; c = 45; f = 14; cals = 480;
-                if(uploadedMealImage && !prompt) itemName = "Photo Scanned Balanced Meal";
+            const scanBtn = document.getElementById('gemini-scan-btn');
+            scanBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Analyzing with Gemini...`;
+            scanBtn.disabled = true;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+            const systemInstruction = `You are an expert sports nutritionist. Analyze the food provided by user (text or image) and return ONLY a valid JSON object with NO markdown formatting (no \`\`\`json). The JSON structure must be:
+            {
+              "name": "Food name with precise grams",
+              "cals": total_calories_integer,
+              "protein": protein_grams_integer,
+              "carbs": carbs_grams_integer,
+              "fats": fats_grams_integer,
+              "grams": grams_integer
+            }`;
+
+            let contents = [
+                {
+                    parts: [
+                        { text: systemInstruction },
+                        { text: `Analyze this meal and return JSON macros: ${promptText || "Healthy meal photo"}` }
+                    ]
+                }
+            ];
+
+            if (uploadedMealImage) {
+                const base64Data = uploadedMealImage.split(',')[1] || uploadedMealImage;
+                contents[0].parts.push({
+                    inline_data: {
+                        mime_type: "image/jpeg",
+                        data: base64Data
+                    }
+                });
             }
 
-            currentScannedFood = {
-                id: 'food_' + Date.now(),
-                name: itemName,
-                cals: Math.round(cals),
-                protein: Math.round(p),
-                carbs: Math.round(c),
-                fats: Math.round(f)
-            };
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: contents })
+                });
 
-            document.getElementById('scanned-item-name').innerText = currentScannedFood.name;
-            document.getElementById('scanned-item-cals').innerText = currentScannedFood.cals + ' kcal';
-            document.getElementById('scanned-item-protein').innerText = currentScannedFood.protein + 'g';
-            document.getElementById('scanned-item-carbs').innerText = currentScannedFood.carbs + 'g';
-            document.getElementById('scanned-item-fats').innerText = currentScannedFood.fats + 'g';
+                const data = await response.json();
+                if(data.error) {
+                    throw new Error(data.error.message);
+                }
 
-            document.getElementById('ai-result-card').classList.remove('hidden');
-            showToast("Macros calculated successfully!");
+                const textResult = data.candidates[0].content.parts[0].text;
+                const cleanJsonStr = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
+                const aiResult = JSON.parse(cleanJsonStr);
+
+                const grams = aiResult.grams || 100;
+                currentScannedFood = {
+                    id: 'food_' + Date.now(),
+                    name: aiResult.name,
+                    grams: grams,
+                    baseP: aiResult.protein / grams,
+                    baseC: aiResult.carbs / grams,
+                    baseF: aiResult.fats / grams,
+                    baseCals: aiResult.cals / grams,
+                    cals: Math.round(aiResult.cals),
+                    protein: Math.round(aiResult.protein),
+                    carbs: Math.round(aiResult.carbs),
+                    fats: Math.round(aiResult.fats)
+                };
+
+                document.getElementById('scanned-item-name').innerText = currentScannedFood.name;
+                document.getElementById('scanned-item-cals').innerText = currentScannedFood.cals + ' kcal';
+                document.getElementById('scanned-item-protein').innerText = currentScannedFood.protein + 'g';
+                document.getElementById('scanned-item-carbs').innerText = currentScannedFood.carbs + 'g';
+                document.getElementById('scanned-item-fats').innerText = currentScannedFood.fats + 'g';
+
+                document.getElementById('ai-result-card').classList.remove('hidden');
+                showToast("Gemini AI analyzed successfully!");
+
+            } catch (error) {
+                console.error(error);
+                alert("API Error: " + error.message);
+            } finally {
+                scanBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> Scan with Gemini AI`;
+                scanBtn.disabled = false;
+            }
         }
 
         function logScannedMeal() {
@@ -807,6 +849,36 @@
             document.getElementById('image-upload-prompt').classList.remove('hidden');
             renderDailyFoodLog();
             showToast("Added to today's food log!");
+        }
+
+        function updateItemGrams(id, newGrams) {
+            newGrams = parseFloat(newGrams);
+            if(!newGrams || newGrams <= 0) return;
+
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            if(!usersDb[currentUser] || !usersDb[currentUser].foodLogs) return;
+
+            let item = usersDb[currentUser].foodLogs.find(i => i.id === id);
+            if(item) {
+                if(item.baseP !== undefined) {
+                    item.grams = newGrams;
+                    item.protein = Math.round(item.baseP * newGrams);
+                    item.carbs = Math.round(item.baseC * newGrams);
+                    item.fats = Math.round(item.baseF * newGrams);
+                    item.cals = Math.round(item.baseCals * newGrams);
+                } else {
+                    let ratio = newGrams / (item.grams || 100);
+                    item.grams = newGrams;
+                    item.protein = Math.round(item.protein * ratio);
+                    item.carbs = Math.round(item.carbs * ratio);
+                    item.fats = Math.round(item.fats * ratio);
+                    item.cals = Math.round(item.cals * ratio);
+                }
+
+                localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
+                renderDailyFoodLog();
+                showToast("Macros updated!");
+            }
         }
 
         function renderDailyFoodLog() {
@@ -828,15 +900,22 @@
                     totalF += item.fats;
 
                     const div = document.createElement('div');
-                    div.className = "bg-darkbg border border-bordercolor p-3 rounded-xl flex items-center justify-between gap-3 text-xs";
+                    div.className = "bg-darkbg border border-bordercolor p-3 rounded-xl space-y-2 text-xs";
                     div.innerHTML = `
-                        <div class="flex-1 min-w-0">
-                            <div class="font-bold text-white truncate">${item.name}</div>
-                            <div class="text-gray-400 mt-0.5">
-                                <span class="text-primary font-semibold">${Math.round(item.cals)} kcal</span> | P:${Math.round(item.protein)}g C:${Math.round(item.carbs)}g F:${Math.round(item.fats)}g
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-white text-sm">${item.name}</span>
+                            <button onclick="deleteFoodItem('${item.id}')" class="text-gray-500 hover:text-red-400 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5">
+                                <input type="number" value="${item.grams || 100}" id="grams-input-${item.id}" class="w-16 bg-cardbg border border-bordercolor rounded p-1 text-center text-white font-bold">
+                                <span class="text-gray-400">g</span>
+                                <button onclick="updateItemGrams('${item.id}', document.getElementById('grams-input-${item.id}').value)" class="bg-primary/20 text-primary border border-primary/40 px-2 py-1 rounded hover:bg-primary/30 font-bold"><i class="fa-solid fa-check"></i></button>
+                            </div>
+                            <div class="text-right text-gray-300 font-mono">
+                                <span class="text-primary font-bold">${item.cals} kcal</span> | P:${item.protein}g C:${item.carbs}g F:${item.fats}g
                             </div>
                         </div>
-                        <button onclick="deleteFoodItem('${item.id}')" class="text-gray-500 hover:text-red-400 p-1"><i class="fa-solid fa-trash-can"></i></button>
                     `;
                     listContainer.appendChild(div);
                 });
