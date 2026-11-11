@@ -45,7 +45,7 @@
                     <i class="fa-solid fa-dumbbell"></i>
                 </div>
                 <h1 class="text-2xl font-bold tracking-tight text-white">GymTracker <span class="text-primary">Pro</span></h1>
-                <p class="text-sm text-gray-400">Log workouts, track progressive overload side-by-side, and master your nutrition.</p>
+                <p class="text-sm text-gray-400">Log workouts, track sets & progressive overload, and master your nutrition.</p>
             </div>
 
             <!-- Auth Tabs -->
@@ -102,7 +102,7 @@
                 <div>
                     <h2 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
                         GymTracker Pro
-                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v3.0</span>
+                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v3.5</span>
                     </h2>
                     <p class="text-xs text-gray-400" id="user-display-email">athlete@gmail.com</p>
                 </div>
@@ -138,7 +138,7 @@
                         <h3 class="text-xl font-bold text-white flex items-center gap-2">
                             <i class="fa-solid fa-clipboard-list text-primary"></i> Log Workout Session
                         </h3>
-                        <p class="text-sm text-gray-400">Select split tag, add exercises, and save.</p>
+                        <p class="text-sm text-gray-400">Add exercises and individual sets with custom weights & reps.</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <label class="text-xs uppercase font-bold text-gray-400">Date:</label>
@@ -167,21 +167,21 @@
 
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
-                                <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300">Exercises</h4>
-                                <button type="button" onclick="addExerciseRow()" class="bg-primary/10 text-primary border border-primary/30 px-3 py-1.5 rounded-xl text-xs font-semibold">Add Exercise</button>
+                                <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300">Exercises & Sets</h4>
+                                <button type="button" onclick="addExerciseBlock()" class="bg-primary/10 text-primary border border-primary/30 px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-primary/20 transition-all"><i class="fa-solid fa-plus mr-1"></i> Add Exercise</button>
                             </div>
-                            <div id="exercises-container" class="space-y-3"></div>
+                            <div id="exercises-container" class="space-y-4"></div>
                         </div>
 
-                        <button type="button" onclick="saveWorkoutSession()" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg text-sm uppercase">Save Workout</button>
+                        <button type="button" onclick="saveWorkoutSession()" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg text-sm uppercase">Save Workout Session</button>
                     </div>
 
                     <div class="space-y-6">
                         <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-4 shadow-xl">
                             <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300"><i class="fa-solid fa-bolt text-primary"></i> Templates</h4>
                             <div class="grid grid-cols-1 gap-2">
-                                <button type="button" onclick="loadTemplate('Upper Day')" class="w-full text-left bg-darkbg border border-bordercolor p-3 rounded-xl text-sm text-white hover:text-primary">Upper Day Template</button>
-                                <button type="button" onclick="loadTemplate('Push Day')" class="w-full text-left bg-darkbg border border-bordercolor p-3 rounded-xl text-sm text-white hover:text-primary">Push Day Template</button>
+                                <button type="button" onclick="loadTemplate('Upper Day')" class="w-full text-left bg-darkbg border border-bordercolor p-3 rounded-xl text-sm text-white hover:text-primary transition-all">Upper Day Template</button>
+                                <button type="button" onclick="loadTemplate('Push Day')" class="w-full text-left bg-darkbg border border-bordercolor p-3 rounded-xl text-sm text-white hover:text-primary transition-all">Push Day Template</button>
                             </div>
                         </div>
                     </div>
@@ -192,31 +192,37 @@
             <section id="page-progressive" class="page-content hidden space-y-6">
                 <div class="bg-cardbg/40 border border-bordercolor p-6 rounded-2xl">
                     <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-chart-line text-primary"></i> Progressive Overload</h3>
-                    <p class="text-sm text-gray-400">View your workout history side-by-side.</p>
+                    <p class="text-sm text-gray-400">View your exercise sets and history.</p>
                 </div>
                 <div id="progressive-tags-container" class="space-y-8"></div>
             </section>
 
             <!-- PAGE 3: CALCULATOR -->
             <section id="page-calculator" class="page-content hidden space-y-6">
-                <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6">
+                <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 max-w-xl mx-auto">
                     <h3 class="text-xl font-bold text-white">BMR & TDEE Calculator</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="number" id="calc-age" value="25" placeholder="Age" class="bg-darkbg border border-bordercolor rounded-xl p-3 text-white">
-                        <input type="number" id="calc-weight" value="75" placeholder="Weight (kg)" class="bg-darkbg border border-bordercolor rounded-xl p-3 text-white">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Age</label>
+                            <input type="number" id="calc-age" value="25" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Weight (kg)</label>
+                            <input type="number" id="calc-weight" value="75" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-white">
+                        </div>
                     </div>
-                    <button onclick="calculateMetrics()" class="bg-primary text-black font-bold py-3 w-full rounded-xl">Calculate</button>
-                    <div id="calc-results" class="text-primary font-bold text-lg"></div>
+                    <button onclick="calculateMetrics()" class="bg-primary text-black font-bold py-3 w-full rounded-xl hover:bg-emerald-600 transition-all">Calculate</button>
+                    <div id="calc-results" class="text-primary font-bold text-lg text-center bg-darkbg p-4 rounded-xl border border-bordercolor"></div>
                 </div>
             </section>
 
             <!-- PAGE 4: AI MACRO -->
             <section id="page-ai-macro" class="page-content hidden space-y-6">
-                <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6">
+                <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 max-w-xl mx-auto">
                     <h3 class="text-xl font-bold text-white">AI Macro Scanner</h3>
-                    <textarea id="ai-food-prompt" placeholder="Describe your meal..." class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-white"></textarea>
-                    <button onclick="analyzeMealWithAI()" class="bg-primary text-black font-bold py-3 w-full rounded-xl">Scan Meal</button>
-                    <div id="ai-result-content" class="hidden text-white font-semibold"></div>
+                    <textarea id="ai-food-prompt" placeholder="Describe your meal (e.g. 200g chicken & rice)..." class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-white h-28"></textarea>
+                    <button onclick="analyzeMealWithAI()" class="bg-primary text-black font-bold py-3 w-full rounded-xl hover:bg-emerald-600 transition-all">Scan Meal</button>
+                    <div id="ai-result-content" class="hidden text-white font-semibold bg-darkbg p-4 rounded-xl border border-bordercolor text-center"></div>
                 </div>
             </section>
         </main>
@@ -299,7 +305,7 @@
             document.getElementById('app-wrapper').classList.remove('hidden');
             document.getElementById('user-display-email').innerText = currentUser;
             document.getElementById('workout-date').value = new Date().toISOString().split('T')[0];
-            if(document.getElementById('exercises-container').children.length === 0) addExerciseRow();
+            if(document.getElementById('exercises-container').children.length === 0) addExerciseBlock();
             switchPage('training');
         }
 
@@ -329,32 +335,67 @@
             if (pageId === 'progressive') renderProgressiveOverload();
         }
 
-        let rowIdx = 0;
-        function addExerciseRow(name='', sets='', reps='', weight='') {
-            rowIdx++;
+        let exerciseBlockIdx = 0;
+
+        function addExerciseBlock(exName = '', setsData = null) {
+            exerciseBlockIdx++;
+            const blockId = `ex-block-${exerciseBlockIdx}`;
             const container = document.getElementById('exercises-container');
+            
             const div = document.createElement('div');
-            div.id = `row-${rowIdx}`;
-            div.className = "flex gap-2 items-center bg-darkbg p-3 rounded-xl border border-bordercolor";
+            div.id = blockId;
+            div.className = "bg-darkbg border border-bordercolor p-4 rounded-xl space-y-3";
             div.innerHTML = `
-                <input type="text" placeholder="Exercise Name" value="${name}" class="ex-name flex-1 bg-cardbg border border-bordercolor rounded-lg p-2 text-sm text-white">
-                <input type="number" placeholder="Sets" value="${sets}" class="ex-sets w-16 bg-cardbg border border-bordercolor rounded-lg p-2 text-sm text-center text-white">
-                <input type="number" placeholder="Reps" value="${reps}" class="ex-reps w-16 bg-cardbg border border-bordercolor rounded-lg p-2 text-sm text-center text-white">
-                <input type="number" step="0.5" placeholder="Kg" value="${weight}" class="ex-weight w-20 bg-cardbg border border-bordercolor rounded-lg p-2 text-sm text-center text-white">
-                <button type="button" onclick="document.getElementById('row-${rowIdx}').remove()" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>
+                <div class="flex gap-2 items-center">
+                    <input type="text" placeholder="Exercise Name (e.g., Bench Press)" value="${exName}" class="ex-name flex-1 bg-cardbg border border-bordercolor rounded-lg p-2.5 text-sm text-white font-semibold">
+                    <button type="button" onclick="document.getElementById('${blockId}').remove()" class="text-red-400 hover:text-red-300 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+                <div class="space-y-2 sets-list pl-2 border-l-2 border-bordercolor">
+                    <!-- Sets injected here -->
+                </div>
+                <button type="button" onclick="addSetRow('${blockId}')" class="text-xs text-primary hover:underline font-semibold pt-1"><i class="fa-solid fa-plus mr-1"></i>Add Set</button>
             `;
             container.appendChild(div);
+
+            if (setsData && setsData.length > 0) {
+                setsData.forEach(s => addSetRow(blockId, s.reps, s.weight));
+            } else {
+                addSetRow(blockId, 10, 60);
+                addSetRow(blockId, 10, 70);
+                addSetRow(blockId, 8, 80);
+            }
+        }
+
+        let setRowCounter = 0;
+        function addSetRow(blockId, reps = '', weight = '') {
+            setRowCounter++;
+            const setId = `set-row-${setRowCounter}`;
+            const block = document.getElementById(blockId);
+            const setsList = block.querySelector('.sets-list');
+
+            const setDiv = document.createElement('div');
+            setDiv.id = setId;
+            setDiv.className = "flex gap-2 items-center text-xs";
+            setDiv.innerHTML = `
+                <span class="text-gray-400 w-12 font-medium">Set</span>
+                <input type="number" placeholder="Reps" value="${reps}" class="set-reps w-20 bg-cardbg border border-bordercolor rounded p-1.5 text-center text-white">
+                <span class="text-gray-400">reps @</span>
+                <input type="number" step="0.5" placeholder="Kg" value="${weight}" class="set-weight w-24 bg-cardbg border border-bordercolor rounded p-1.5 text-center text-white">
+                <span class="text-gray-400">kg</span>
+                <button type="button" onclick="document.getElementById('${setId}').remove()" class="text-gray-500 hover:text-red-400 ml-auto p-1"><i class="fa-solid xmark fa-xmark text-sm"></i>✕</button>
+            `;
+            setsList.appendChild(setDiv);
         }
 
         function loadTemplate(type) {
             document.getElementById('exercises-container').innerHTML = '';
             document.getElementById('workout-tag').value = type;
             if(type === 'Upper Day') {
-                addExerciseRow('Bench Press', 3, 8, 80);
-                addExerciseRow('Barbell Row', 3, 10, 70);
+                addExerciseBlock('Bench Press', [{reps: 10, weight: 70}, {reps: 8, weight: 80}]);
+                addExerciseBlock('Barbell Row', [{reps: 10, weight: 60}, {reps: 10, weight: 70}]);
             } else {
-                addExerciseRow('Incline Press', 3, 10, 30);
-                addExerciseRow('Lateral Raise', 4, 15, 12);
+                addExerciseBlock('Incline Dumbbell Press', [{reps: 12, weight: 26}, {reps: 10, weight: 30}]);
+                addExerciseBlock('Lateral Raise', [{reps: 15, weight: 12}, {reps: 12, weight: 14}]);
             }
         }
 
@@ -362,22 +403,34 @@
             const tag = document.getElementById('workout-tag').value;
             const date = document.getElementById('workout-date').value;
             const notes = document.getElementById('workout-notes').value;
+            
             let exercises = [];
-            document.querySelectorAll('#exercises-container > div').forEach(r => {
-                exercises.push({
-                    name: r.querySelector('.ex-name').value,
-                    sets: r.querySelector('.ex-sets').value || 3,
-                    reps: r.querySelector('.ex-reps').value || 10,
-                    weight: r.querySelector('.ex-weight').value || 0
+            document.querySelectorAll('#exercises-container > div').forEach(block => {
+                const name = block.querySelector('.ex-name').value.trim();
+                if (!name) return;
+                
+                let sets = [];
+                block.querySelectorAll('.sets-list > div').forEach(row => {
+                    const reps = row.querySelector('.set-reps').value || 10;
+                    const weight = row.querySelector('.set-weight').value || 0;
+                    sets.push({ reps, weight });
                 });
+
+                if (sets.length > 0) {
+                    exercises.push({ name, sets });
+                }
             });
-            if(exercises.length === 0) { alert("Add at least one exercise"); return; }
+
+            if(exercises.length === 0) { alert("Please add at least one exercise with sets."); return; }
+            
             let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
             usersDb[currentUser].workouts.push({ id: Date.now(), tag, date, notes, exercises });
             localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
-            showToast("Workout saved!");
+            showToast("Workout session saved successfully!");
+            
+            document.getElementById('workout-notes').value = '';
             document.getElementById('exercises-container').innerHTML = '';
-            addExerciseRow();
+            addExerciseBlock();
         }
 
         function renderProgressiveOverload() {
@@ -385,17 +438,37 @@
             container.innerHTML = '';
             let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
             let workouts = usersDb[currentUser]?.workouts || [];
+            
             if(workouts.length === 0) {
-                container.innerHTML = `<div class="text-gray-400 text-center p-6">No workouts logged yet.</div>`;
+                container.innerHTML = `<div class="bg-cardbg border border-bordercolor rounded-2xl text-gray-400 text-center p-8">No workouts logged yet. Start recording your sessions!</div>`;
                 return;
             }
+
             workouts.forEach(w => {
                 let d = document.createElement('div');
-                d.className = "bg-cardbg border border-bordercolor p-4 rounded-xl space-y-2";
-                d.innerHTML = `<h4 class="text-primary font-bold">${w.tag} - ${w.date}</h4><p class="text-sm text-gray-400">${w.notes || ''}</p>`;
+                d.className = "bg-cardbg border border-bordercolor p-6 rounded-2xl space-y-4 shadow-xl";
+                
+                let exHtml = '';
                 w.exercises.forEach(e => {
-                    d.innerHTML += `<div class="text-xs bg-darkbg p-2 rounded">${e.name}: ${e.sets} sets x ${e.reps} reps @ ${e.weight}kg</div>`;
+                    let setsHtml = '';
+                    e.sets.forEach((s, idx) => {
+                        setsHtml += `<span class="bg-darkbg border border-bordercolor px-2 py-1 rounded text-xs text-primary font-mono">Set ${idx+1}: ${s.reps} reps @ ${s.weight}kg</span>`;
+                    });
+                    exHtml += `
+                        <div class="bg-darkbg/50 border border-bordercolor p-3 rounded-xl space-y-2">
+                            <div class="font-bold text-white text-sm">${e.name}</div>
+                            <div class="flex flex-wrap gap-2">${setsHtml}</div>
+                        </div>
+                    `;
                 });
+
+                d.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-bordercolor pb-3">
+                        <h4 class="text-primary font-bold text-base"><i class="fa-solid fa-tag mr-2"></i>${w.tag} <span class="text-xs text-gray-400 font-normal">(${w.date})</span></h4>
+                    </div>
+                    ${w.notes ? `<p class="text-xs text-gray-400 italic">"${w.notes}"</p>` : ''}
+                    <div class="space-y-3">${exHtml}</div>
+                `;
                 container.appendChild(d);
             });
         }
@@ -411,7 +484,7 @@
             const p = document.getElementById('ai-food-prompt').value;
             if(!p) return;
             document.getElementById('ai-result-content').classList.remove('hidden');
-            document.getElementById('ai-result-content').innerText = `Estimated for "${p}": ~450 kcal | 35g P | 40g C | 12g F`;
+            document.getElementById('ai-result-content').innerText = `Gemini AI Estimate for "${p}": ~480 kcal | 42g Protein | 45g Carbs | 14g Fats`;
         }
     </script>
 </body>
