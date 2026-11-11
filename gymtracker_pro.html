@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymTracker Pro - Elite Fitness & Nutrition Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10B981', // Emerald green theme
+                        darkbg: '#0B0F19',
+                        cardbg: '#1F2937',
+                        bordercolor: '#374151'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #111827; border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #10B981; }
+        
+        /* Smooth horizontal scroll snapping for side-by-side overload comparison */
+        .horizontal-slider {
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+        }
+        .horizontal-slider > div {
+            scroll-snap-align: start;
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-gray-100 min-h-screen flex flex-col selection:bg-primary selection:text-black">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- AUTHENTICATION VIEW -->
+    <div id="auth-view" class="fixed inset-0 z-40 bg-darkbg flex items-center justify-center p-4 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.15),rgba(255,255,255,0))]">
+        <div class="max-w-md w-full bg-cardbg/90 backdrop-blur-xl border border-bordercolor rounded-2xl shadow-2xl p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 text-primary text-2xl mb-2 shadow-inner">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-white">GymTracker <span class="text-primary">Pro</span></h1>
+                <p class="text-sm text-gray-400">Log workouts, track progressive overload side-by-side, and master your nutrition.</p>
+            </div>
+
+            <!-- Auth Tabs -->
+            <div id="auth-tabs-container" class="grid grid-cols-2 gap-2 bg-darkbg/60 p-1.5 rounded-xl border border-bordercolor text-sm font-medium">
+                <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="py-2.5 rounded-lg transition-all text-black bg-primary font-semibold shadow">Sign In</button>
+                <button type="button" id="tab-register" onclick="switchAuthTab('register')" class="py-2.5 rounded-lg transition-all text-gray-400 hover:text-white">Create Account</button>
+            </div>
+
+            <!-- Auth Form -->
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Email Address</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-regular fa-envelope"></i></span>
+                        <input type="email" id="auth-email" required placeholder="athlete@gmail.com" class="w-full bg-darkbg border border-bordercolor rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors">
+                    </div>
+                </div>
+                <div id="password-field-container">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-darkbg border border-bordercolor rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors">
+                    </div>
+                    <div class="flex justify-end mt-1">
+                        <button type="button" onclick="switchAuthMode('forgot')" class="text-xs text-primary hover:underline">Forgot password?</button>
+                    </div>
+                </div>
+
+                <div id="auth-error-box" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span id="auth-error-text">Error message</span>
+                </div>
+
+                <div id="auth-success-box" class="hidden p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span id="auth-success-text">Success message</span>
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                    <span id="auth-btn-text">Sign In</span>
+                    <i class="fa-solid fa-arrow-right-long"></i>
+                </button>
+
+                <div id="back-to-login-container" class="hidden text-center pt-2">
+                    <button type="button" onclick="switchAuthMode('login')" class="text-xs text-gray-400 hover:text-white underline">Back to Sign In</button>
+                </div>
+            </form>
+
+            <div class="text-center text-xs text-gray-500">
+                Secure local storage auth enabled. Your data stays in your browser.
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER (Hidden until logged in) -->
+    <div id="app-wrapper" class="hidden flex-1 flex flex-col min-h-screen">
+        <!-- Top Navbar -->
+        <header class="sticky top-0 z-30 bg-darkbg/80 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shadow">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        GymTracker Pro
+                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v3.1</span>
+                    </h2>
+                    <p class="text-xs text-gray-400" id="user-display-email">athlete@gmail.com</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="logout()" class="flex items-center gap-2 bg-darkbg hover:bg-red-500/10 text-gray-300 hover:text-red-400 border border-bordercolor hover:border-red-500/30 px-4 py-2 rounded-xl text-sm font-medium transition-all">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="hidden sm:inline">Sign Out</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs Bar -->
+        <nav class="bg-cardbg/50 border-b border-bordercolor px-6 py-2 overflow-x-auto flex gap-2 custom-scrollbar">
+            <button onclick="switchPage('training')" id="nav-training" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all bg-primary text-black shadow-md shadow-primary/10 whitespace-nowrap">
+                <i class="fa-solid fa-dumbbell"></i>
+                Workout Log
+            </button>
+            <button onclick="switchPage('progressive')" id="nav-progressive" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap">
+                <i class="fa-solid fa-chart-line"></i>
+                Progressive Overload (Side-by-Side)
+            </button>
+            <button onclick="switchPage('calculator')" id="nav-calculator" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap">
+                <i class="fa-solid fa-calculator"></i>
+                BMR & TDEE Calculator
+            </button>
+            <button onclick="switchPage('ai-macro')" id="nav-ai-macro" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap">
+                <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
+                AI Macro & Food Scanner
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full">
+
+            <!-- PAGE 1: WORKOUT LOG -->
+            <section id="page-training" class="page-content space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-cardbg/40 border border-bordercolor p-6 rounded-2xl">
+                    <div>
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-clipboard-list text-primary"></i> Log Workout Session
+                        </h3>
+                        <p class="text-sm text-gray-400">Select your split tag, add exercises with sets, reps, and weights, then save.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-xs uppercase font-bold text-gray-400">Workout Date:</label>
+                        <input type="date" id="workout-date" class="bg-darkbg border border-bordercolor rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Form Editor -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Split / Workout Tag</label>
+                                    <input type="text" id="workout-tag" placeholder="Upper Day" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Session Notes (Optional)</label>
+                                    <input type="text" id="workout-notes" placeholder="e.g. Felt strong on bench today!" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary">
+                                </div>
+                            </div>
+
+                            <!-- Exercises List -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300">Exercises List</h4>
+                                    <button type="button" onclick="addExerciseRow()" class="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5">
+                                        <i class="fa-solid fa-plus"></i> Add Exercise
+                                    </button>
+                                </div>
+
+                                <div id="exercises-container" class="space-y-3">
+                                    <!-- Dynamic Rows Injected Here -->
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="saveWorkoutSession()" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 text-sm uppercase tracking-wider">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Workout & Sync Progressive Overload
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Quick Templates -->
+                    <div class="space-y-6">
+                        <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-4 shadow-xl">
+                            <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
+                                <i class="fa-solid fa-bolt text-primary"></i> Quick Templates
+                            </h4>
+                            <p class="text-xs text-gray-400">Load preset exercises to speed up logging.</p>
+                            
+                            <div class="grid grid-cols-1 gap-2">
+                                <button type="button" onclick="loadTemplate('Upper Day')" class="w-full text-left bg-darkbg hover:bg-bordercolor/50 border border-bordercolor p-3 rounded-xl transition-all flex items-center justify-between group">
+                                    <span class="text-sm font-medium text-white group-hover:text-primary">Upper Day (Bench, Row, Press)</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </button>
+                                <button type="button" onclick="loadTemplate('Push Day')" class="w-full text-left bg-darkbg hover:bg-bordercolor/50 border border-bordercolor p-3 rounded-xl transition-all flex items-center justify-between group">
+                                    <span class="text-sm font-medium text-white group-hover:text-primary">Push Day (Incline, OHP, Dips)</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </button>
+                                <button type="button" onclick="loadTemplate('Pull Day')" class="w-full text-left bg-darkbg hover:bg-bordercolor/50 border border-bordercolor p-3 rounded-xl transition-all flex items-center justify-between group">
+                                    <span class="text-sm font-medium text-white group-hover:text-primary">Pull Day (Deadlift, Lat Pulldown)</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </button>
+                                <button type="button" onclick="loadTemplate('Legs Day')" class="w-full text-left bg-darkbg hover:bg-bordercolor/50 border border-bordercolor p-3 rounded-xl transition-all flex items-center justify-between group">
+                                    <span class="text-sm font-medium text-white group-hover:text-primary">Legs Day (Squat, RDL, Leg Press)</span>
+                                    <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-4 shadow-xl">
+                            <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-left-right text-primary"></i> Side-by-Side Comparison
+                            </h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Workout entries with the same tag (e.g., "Upper Day") will automatically align side-by-side in horizontal sliders on the Progressive Overload page!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 2: PROGRESSIVE OVERLOAD HISTORY (SIDE-BY-SIDE SLIDER) -->
+            <section id="page-progressive" class="page-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-cardbg/40 border border-bordercolor p-6 rounded-2xl">
+                    <div>
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-primary"></i> Progressive Overload (Side-by-Side View)
+                        </h3>
+                        <p class="text-sm text-gray-400">Workout sessions with the same Tag are grouped together into horizontal sliders. Scroll horizontally to track weekly progress!</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <select id="filter-tag-progressive" onchange="renderProgressiveOverload()" class="bg-darkbg border border-bordercolor rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary">
+                            <option value="ALL">All Workout Tags</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Horizontal Sliders Grouped by Tag -->
+                <div id="progressive-tags-container" class="space-y-8">
+                    <!-- Dynamically Injected Tag Groups & Horizontal Sliders -->
+                </div>
+            </section>
+
+            <!-- PAGE 3: BMR & TDEE CALCULATOR -->
+            <section id="page-calculator" class="page-content hidden space-y-6">
+                <div class="bg-cardbg/40 border border-bordercolor p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-primary"></i> BMR & TDEE Calorie Calculator
+                    </h3>
+                    <p class="text-sm text-gray-400">Calculate your Basal Metabolic Rate and Total Daily Energy Expenditure using the Mifflin-St Jeor equation.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Form inputs -->
+                    <div class="lg:col-span-2 bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Gender</label>
+                                <select id="calc-gender" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Age (years)</label>
+                                <input type="number" id="calc-age" value="25" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Weight (kg)</label>
+                                <input type="number" id="calc-weight" value="75" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Height (cm)</label>
+                                <input type="number" id="calc-height" value="178" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Activity Level</label>
+                            <select id="calc-activity" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                                <option value="1.2">Sedentary (little or no exercise)</option>
+                                <option value="1.375">Lightly Active (light exercise/sports 1-3 days/week)</option>
+                                <option value="1.55" selected>Moderately Active (moderate exercise/sports 3-5 days/week)</option>
+                                <option value="1.725">Very Active (hard exercise/sports 6-7 days a week)</option>
+                                <option value="1.9">Extra Active (very hard exercise/physical job)</option>
+                            </select>
+                        </div>
+
+                        <button type="button" onclick="calculateMetrics()" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 uppercase tracking-wider text-sm">
+                            <i class="fa-solid fa-calculator"></i> Calculate BMR & TDEE
+                        </button>
+                    </div>
+
+                    <!-- Results Card -->
+                    <div class="space-y-6">
+                        <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300 mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-fire text-primary"></i> Your Energy Expenditure
+                                </h4>
+                                <div class="space-y-4">
+                                    <div class="bg-darkbg/60 border border-bordercolor p-4 rounded-xl text-center">
+                                        <span class="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Basal Metabolic Rate (BMR)</span>
+                                        <span id="result-bmr" class="text-3xl font-extrabold text-white">--</span>
+                                        <span class="text-xs text-gray-500 block mt-1">Calories burned at rest</span>
+                                    </div>
+                                    <div class="bg-primary/10 border border-primary/20 p-4 rounded-xl text-center">
+                                        <span class="block text-xs uppercase tracking-wider text-primary font-semibold mb-1">Total Daily Energy (TDEE)</span>
+                                        <span id="result-tdee" class="text-3xl font-extrabold text-primary">--</span>
+                                        <span class="text-xs text-emerald-400/80 block mt-1">Calories to maintain weight</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Goal breakdown -->
+                            <div class="space-y-2 pt-4 border-t border-bordercolor">
+                                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Goal Targets:</span>
+                                <div class="flex justify-between text-xs text-gray-300 bg-darkbg p-2.5 rounded-lg">
+                                    <span>Fat Loss (-500 kcal):</span>
+                                    <span id="goal-cut" class="font-bold text-white">-- kcal</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-300 bg-darkbg p-2.5 rounded-lg">
+                                    <span>Muscle Gain (+300 kcal):</span>
+                                    <span id="goal-bulk" class="font-bold text-white">-- kcal</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 4: AI FOOD & PHOTO MACRO CALCULATOR -->
+            <section id="page-ai-macro" class="page-content hidden space-y-6">
+                <div class="bg-cardbg/40 border border-bordercolor p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> AI Food & Photo Macro Scanner
+                    </h3>
+                    <p class="text-sm text-gray-400">Describe your meal or upload a food photo to estimate calories and macros (protein, carbs, fats) via Gemini Vision API and add them to your daily food log.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Input Section -->
+                    <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Describe Meal / Food Item</label>
+                                <textarea id="ai-food-prompt" rows="3" placeholder="e.g., 200g grilled chicken breast with 1.5 cups white rice and avocado salad..." class="w-full bg-darkbg border border-bordercolor rounded-xl p-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary resize-none"></textarea>
+                            </div>
+
+                            <!-- Photo Upload Integration -->
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Upload Meal Photo (Gemini AI Vision)</label>
+                                <div class="border-2 border-dashed border-bordercolor hover:border-primary/50 rounded-2xl p-6 text-center cursor-pointer bg-darkbg/50 transition-all relative" onclick="document.getElementById('meal-file-input').click()">
+                                    <input type="file" id="meal-file-input" accept="image/*" class="hidden" onchange="handleMealImageUpload(event)">
+                                    <div id="upload-placeholder" class="space-y-2">
+                                        <div class="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary mx-auto flex items-center justify-center text-xl">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        </div>
+                                        <p class="text-sm font-medium text-white">Click to upload food photo or drag & drop</p>
+                                        <p class="text-xs text-gray-500">Supports PNG, JPG (Gemini AI Vision OCR)</p>
+                                    </div>
+                                    <div id="upload-preview-container" class="hidden space-y-2">
+                                        <img id="upload-preview-img" src="" alt="Meal preview" class="max-h-40 mx-auto rounded-xl border border-bordercolor shadow-md">
+                                        <p class="text-xs text-primary font-medium">Image loaded successfully! Ready for AI analysis.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="analyzeMealWithAI()" id="ai-scan-btn" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 uppercase tracking-wider text-sm mt-4">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Scan Macros with Gemini AI
+                        </button>
+                    </div>
+
+                    <!-- AI Results & Daily Log Section -->
+                    <div class="space-y-6">
+                        <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl">
+                            <div>
+                                <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300 mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-pie text-primary"></i> Last Scan Breakdown
+                                </h4>
+
+                                <div id="ai-loading-state" class="hidden py-12 text-center space-y-3">
+                                    <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                    <p class="text-sm text-gray-400">Gemini AI is analyzing food items & calculating macros...</p>
+                                </div>
+
+                                <div id="ai-empty-state" class="py-12 text-center space-y-3">
+                                    <div class="w-12 h-12 rounded-xl bg-darkbg border border-bordercolor text-gray-500 mx-auto flex items-center justify-center text-xl">
+                                        <i class="fa-solid fa-utensils"></i>
+                                    </div>
+                                    <p class="text-sm text-gray-400">Enter a food description or upload a photo to view AI analysis.</p>
+                                </div>
+
+                                <div id="ai-result-content" class="hidden space-y-4">
+                                    <div class="bg-darkbg/60 border border-bordercolor p-4 rounded-xl space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-semibold text-gray-400 uppercase">Item Name</span>
+                                            <span id="ai-res-name" class="text-sm font-bold text-white">Grilled Chicken & Rice</span>
+                                        </div>
+                                        <div class="grid grid-cols-4 gap-2 text-center pt-2 border-t border-bordercolor">
+                                            <div>
+                                                <span class="block text-[10px] uppercase text-gray-500 font-semibold">Calories</span>
+                                                <span id="ai-res-cals" class="text-base font-extrabold text-primary">0</span>
+                                            </div>
+                                            <div>
+                                                <span class="block text-[10px] uppercase text-gray-500 font-semibold">Protein</span>
+                                                <span id="ai-res-protein" class="text-base font-bold text-white">0g</span>
+                                            </div>
+                                            <div>
+                                                <span class="block text-[10px] uppercase text-gray-500 font-semibold">Carbs</span>
+                                                <span id="ai-res-carbs" class="text-base font-bold text-white">0g</span>
+                                            </div>
+                                            <div>
+                                                <span class="block text-[10px] uppercase text-gray-500 font-semibold">Fats</span>
+                                                <span id="ai-res-fats" class="text-base font-bold text-white">0g</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" onclick="logScannedMealToDaily()" class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-primary border border-primary/40 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+                                        <i class="fa-solid fa-circle-plus"></i> Add to Daily Food Log
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Daily Macro Totals & Log -->
+                        <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
+                                    <i class="fa-solid fa-calendar-day text-primary"></i> Today's Nutrition Dashboard
+                                </h4>
+                                <span id="daily-date-badge" class="text-xs bg-darkbg border border-bordercolor px-2.5 py-1 rounded-lg text-gray-400 font-medium">Today</span>
+                            </div>
+
+                            <div class="grid grid-cols-4 gap-2 bg-darkbg/60 p-4 rounded-xl border border-bordercolor text-center">
+                                <div>
+                                    <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Total Cals</span>
+                                    <span id="daily-total-cals" class="text-lg font-extrabold text-primary">0</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Protein</span>
+                                    <span id="daily-total-protein" class="text-base font-bold text-white">0g</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Carbs</span>
+                                    <span id="daily-total-carbs" class="text-base font-bold text-white">0g</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Fats</span>
+                                    <span id="daily-total-fats" class="text-base font-bold text-white">0g</span>
+                                </div>
+                            </div>
+
+                            <!-- Logged items list with edit & delete -->
+                            <div id="daily-food-list" class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                                <!-- Dynamic Items -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // --- APPLICATION STATE ---
+        let currentUser = null;
+        let authMode = 'login'; // 'login', 'register', or 'forgot'
+        let uploadedImageBase64 = null;
+        let currentScannedItem = null;
+
+        // --- TOAST NOTIFICATIONS ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl text-sm font-medium transition-all transform translate-y-2 opacity-0 ${
+                type === 'success' ? 'bg-cardbg border-primary/40 text-white' : 'bg-cardbg border-red-500/40 text-red-400'
+            }`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-primary' : 'fa-circle-exclamation text-red-400'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => { toast.remove(); }, 300);
+            }, 3000);
+        }
+
+        // --- AUTHENTICATION LOGIC ---
+        function switchAuthTab(mode) {
+            authMode = mode;
+            const loginBtn = document.getElementById('tab-login');
+            const regBtn = document.getElementById('tab-register');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const errorBox = document.getElementById('auth-error-box');
+            const successBox = document.getElementById('auth-success-box');
+            const passwordContainer = document.getElementById('password-field-container');
+            const backLoginContainer = document.getElementById('back-to-login-container');
+            const tabsContainer = document.getElementById('auth-tabs-container');
+
+            errorBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+            passwordContainer.classList.remove('hidden');
+            backLoginContainer.classList.add('hidden');
+            tabsContainer.classList.remove('hidden');
+
+            if (mode === 'login') {
+                loginBtn.className = "py-2.5 rounded-lg transition-all text-black bg-primary font-semibold shadow";
+                regBtn.className = "py-2.5 rounded-lg transition-all text-gray-400 hover:text-white";
+                submitBtn.querySelector('span').innerText = "Sign In";
+            } else {
+                regBtn.className = "py-2.5 rounded-lg transition-all text-black bg-primary font-semibold shadow";
+                loginBtn.className = "py-2.5 rounded-lg transition-all text-gray-400 hover:text-white";
+                submitBtn.querySelector('span').innerText = "Create Account";
+            }
+        }
+
+        function switchAuthMode(mode) {
+            authMode = mode;
+            const errorBox = document.getElementById('auth-error-box');
+            const successBox = document.getElementById('auth-success-box');
+            const passwordContainer = document.getElementById('password-field-container');
+            const backLoginContainer = document.getElementById('back-to-login-container');
+            const tabsContainer = document.getElementById('auth-tabs-container');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            errorBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+
+            if (mode === 'forgot') {
+                tabsContainer.classList.add('hidden');
+                passwordContainer.classList.add('hidden');
+                backLoginContainer.classList.remove('hidden');
+                submitBtn.querySelector('span').innerText = "Send Reset Instructions";
+            } else {
+                switchAuthTab('login');
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim().toLowerCase();
+            const password = document.getElementById('auth-password').value;
+            const errorBox = document.getElementById('auth-error-box');
+            const errorText = document.getElementById('auth-error-text');
+            const successBox = document.getElementById('auth-success-box');
+            const successText = document.getElementById('auth-success-text');
+
+            errorBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+
+            if (!email) {
+                errorText.innerText = "Please enter your email address.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+
+            if (authMode === 'forgot') {
+                if (!usersDb[email]) {
+                    errorText.innerText = "No account found with this email address.";
+                    errorBox.classList.remove('hidden');
+                    return;
+                }
+                successText.innerText = `Password reset instructions have been sent to ${email}. Check your inbox!`;
+                successBox.classList.remove('hidden');
+                showToast("Password reset email simulated successfully!");
+                return;
+            }
+
+            if (!password) {
+                errorText.innerText = "Please enter your password.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            if (authMode === 'register') {
+                if (usersDb[email]) {
+                    errorText.innerText = "Account already exists with this email. Please sign in.";
+                    errorBox.classList.remove('hidden');
+                    return;
+                }
+                usersDb[email] = {
+                    password: password,
+                    workouts: [],
+                    foodLogs: []
+                };
+                localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
+                showToast("Account created successfully!");
+            } else {
+                if (!usersDb[email]) {
+                    errorText.innerText = "Email not found. Please create an account first.";
+                    errorBox.classList.remove('hidden');
+                    showToast("Email not found", "error");
+                    return;
+                }
+                if (usersDb[email].password !== password) {
+                    errorText.innerText = "Incorrect password. Please try again.";
+                    errorBox.classList.remove('hidden');
+                    showToast("Wrong password", "error");
+                    return;
+                }
+            }
+
+            // Successful Login / Register
+            currentUser = email;
+            localStorage.setItem('gym_current_session', currentUser);
+            initAppSession();
+        }
+
+        function initAppSession() {
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('app-wrapper').classList.remove('hidden');
+            document.getElementById('user-display-email').innerText = currentUser;
+            
+            // Set today's date defaults
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('workout-date').value = todayStr;
+
+            // Initialize default exercise row
+            const container = document.getElementById('exercises-container');
+            if (container.children.length === 0) {
+                addExerciseRow();
+            }
+
+            switchPage('training');
+            showToast("Welcome back, " + currentUser.split('@')[0] + "!");
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('gym_current_session');
+            document.getElementById('app-wrapper').classList.add('hidden');
+            document.getElementById('auth-view').classList.remove('hidden');
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
+            showToast("Signed out successfully.");
+        }
+
+        // Check active session on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('gym_current_session');
+            if (savedSession) {
+                let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+                if (usersDb[savedSession]) {
+                    currentUser = savedSession;
+                    initAppSession();
+                }
+            }
+        });
+
+        // --- NAVIGATION ---
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap";
+            });
+
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${pageId}`);
+            activeBtn.className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all bg-primary text-black shadow-md shadow-primary/10 whitespace-nowrap";
+
+            if (pageId === 'progressive') {
+                renderProgressiveOverload();
+            } else if (pageId === 'calculator') {
+                calculateMetrics();
+            } else if (pageId === 'ai-macro') {
+                renderDailyFoodLog();
+            }
+        }
+
+        // --- USER DATA HELPERS ---
+        function getUserData() {
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            if (!usersDb[currentUser]) {
+                usersDb[currentUser] = { workouts: [], foodLogs: [] };
+            }
+            return usersDb[currentUser];
+        }
+
+        function saveUserData(data) {
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            usersDb[currentUser] = data;
+            localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
+        }
+
+        // --- WORKOUT LOGGING ---
+        let exerciseRowIdx = 0;
+
+        function addExerciseRow(name = '', sets = '', reps = '', weight = '') {
+            exerciseRowIdx++;
+            const container = document.getElementById('exercises-container');
+            const rowId = `ex-row-${exerciseRowIdx}`;
+            
+            const div = document.createElement('div');
+            div.id = rowId;
+            div.className = "bg-darkbg border border-bordercolor p-4 rounded-xl flex flex-col sm:flex-row gap-3 items-center";
+            div.innerHTML = `
+                <div class="flex-1 w-full">
+                    <input type="text" placeholder="Exercise Name (e.g., Barbell Bench Press)" value="${name}" class="ex-name w-full bg-cardbg border border-bordercolor rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary">
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <div class="w-20">
+                        <input type="number" placeholder="Sets" value="${sets}" class="ex-sets w-full bg-cardbg border border-bordercolor rounded-lg px-2.5 py-2 text-sm text-center text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <div class="w-20">
+                        <input type="number" placeholder="Reps" value="${reps}" class="ex-reps w-full bg-cardbg border border-bordercolor rounded-lg px-2.5 py-2 text-sm text-center text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <div class="w-24">
+                        <input type="number" step="0.5" placeholder="Weight (kg)" value="${weight}" class="ex-weight w-full bg-cardbg border border-bordercolor rounded-lg px-2.5 py-2 text-sm text-center text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-gray-500 hover:text-red-400 p-2 transition-colors">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function loadTemplate(splitType) {
+            const container = document.getElementById('exercises-container');
+            container.innerHTML = '';
+            document.getElementById('workout-tag').value = splitType;
+
+            let templateData = [];
+            if (splitType === 'Upper Day') {
+                templateData = [
+                    { name: 'Barbell Bench Press', sets: 3, reps: 8, weight: 80 },
+                    { name: 'Bent Over Barbell Row', sets: 3, reps: 10, weight: 70 },
+                    { name: 'Overhead Press', sets: 3, reps: 8, weight: 50 },
+                    { name: 'Lat Pulldown', sets: 3, reps: 12, weight: 60 }
+                ];
+            } else if (splitType === 'Push Day') {
+                templateData = [
+                    { name: 'Incline Dumbbell Press', sets: 3, reps: 10, weight: 30 },
+                    { name: 'Seated Overhead Press', sets: 3, reps: 8, weight: 55 },
+                    { name: 'Dumbbell Lateral Raise', sets: 4, reps: 15, weight: 12 },
+                    { name: 'Tricep Pushdown', sets: 3, reps: 12, weight: 35 }
+                ];
+            } else if (splitType === 'Pull Day') {
+                templateData = [
+                    { name: 'Conventional Deadlift', sets: 3, reps: 5, weight: 140 },
+                    { name: 'Pull-Ups', sets: 3, reps: 8, weight: 0 },
+                    { name: 'Seated Cable Row', sets: 3, reps: 10, weight: 65 },
+                    { name: 'Dumbbell Bicep Curl', sets: 3, reps: 12, weight: 16 }
+                ];
+            } else if (splitType === 'Legs Day') {
+                templateData = [
+                    { name: 'Barbell Back Squat', sets: 3, reps: 8, weight: 100 },
+                    { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: 90 },
+                    { name: 'Leg Press', sets: 3, reps: 12, weight: 180 },
+                    { name: 'Standing Calf Raise', sets: 4, reps: 15, weight: 70 }
+                ];
+            }
+
+            templateData.forEach(item => {
+                addExerciseRow(item.name, item.sets, item.reps, item.weight);
+            });
+            showToast(`Loaded template: ${splitType}`);
+        }
+
+        function saveWorkoutSession() {
+            const tag = document.getElementById('workout-tag').value.trim() || 'General Workout';
+            const date = document.getElementById('workout-date').value || new Date().toISOString().split('T')[0];
+            const notes = document.getElementById('workout-notes').value.trim();
+
+            const rows = document.querySelectorAll('#exercises-container > div');
+            let exercises = [];
+
+            rows.forEach(row => {
+                const name = row.querySelector('.ex-name').value.trim();
+                const sets = row.querySelector('.ex-sets').value;
+                const reps = row.querySelector('.ex-reps').value;
+                const weight = row.querySelector('.ex-weight').value;
+
+                if (name) {
+                    exercises.push({
+                        name: name,
+                        sets: sets || '3',
+                        reps: reps || '10',
+                        weight: weight || '0'
+                    });
+                }
+            });
+
+            if (exercises.length === 0) {
+                showToast("Please add at least one exercise.", "error");
+                return;
+            }
+
+            const sessionObj = {
+                id: 'sess_' + Date.now(),
+                tag: tag,
+                date: date,
+                notes: notes,
+                exercises: exercises
+            };
+
+            let userData = getUserData();
+            userData.workouts.push(sessionObj);
+            saveUserData(userData);
+
+            showToast("Workout saved & progressive overload synced!");
+            document.getElementById('workout-notes').value = '';
+            document.getElementById('exercises-container').innerHTML = '';
+            addExerciseRow();
+        }
+
+        // --- PROGRESSIVE OVERLOAD SIDE-BY-SIDE RENDERER ---
+        function renderProgressiveOverload() {
+            const container = document.getElementById('progressive-tags-container');
+            container.innerHTML = '';
+
+            let userData = getUserData();
+            let workouts = userData.workouts || [];
+
+            if (workouts.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-cardbg border border-bordercolor rounded-2xl p-12 text-center space-y-3">
+                        <div class="w-12 h-12 rounded-xl bg-darkbg border border-bordercolor text-gray-500 mx-auto flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h4 class="text-base font-bold text-white">No Workout History Found</h4>
+                        <p class="text-sm text-gray-400">Log your first workout session to view side-by-side progressive overload.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tags = [...new Set(workouts.map(w => w.tag))];
+            let select = document.getElementById('filter-tag-progressive');
+            select.innerHTML = '<option value="ALL">All Workout Tags</option>' + tags.map(t => `<option value="${t}">${t}</option>`).join('');
+
+            const filterTag = select.value;
+            let groupedByTag = {};
+            workouts.forEach(w => {
+                if (filterTag !== 'ALL' && w.tag !== filterTag) return;
+                if (!groupedByTag[w.tag]) {
+                    groupedByTag[w.tag] = [];
+                }
+                groupedByTag[w.tag].push(w);
+            });
+
+            if (Object.keys(groupedByTag).length === 0) {
+                container.innerHTML = `
+                    <div class="bg-cardbg border border-bordercolor rounded-2xl p-8 text-center text-gray-400 text-sm">
+                        No workouts found for the selected tag filter.
+                    </div>
+                `;
+                return;
+            }
+
+            Object.keys(groupedByTag).forEach(tag => {
+                const sessions = groupedByTag[tag];
+                sessions.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = "bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-4 shadow-xl";
+
+                let cardsHTML = '';
+                sessions.forEach((sess, idx) => {
+                    let exListHTML = '';
+                    sess.exercises.forEach(ex => {
+                        exListHTML += `
+                            <div class="bg-darkbg/70 border border-bordercolor/60 p-2.5 rounded-xl space-y-1">
+                                <div class="text-xs font-bold text-white truncate">${ex.name}</div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-primary font-mono font-semibold">${ex.sets} sets × ${ex.reps} reps</span>
+                                    <span class="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded font-mono font-bold">${ex.weight} kg</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    cardsHTML += `
+                        <div class="min-w-[280px] sm:min-w-[320px] max-w-[320px] bg-darkbg border border-bordercolor rounded-xl p-4 flex flex-col justify-between shrink-0 shadow-md">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between border-b border-bordercolor pb-2">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-primary">Session #${idx + 1}</span>
+                                    <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${sess.date}</span>
+                                </div>
+                                ${sess.notes ? `<p class="text-xs text-gray-400 italic">"${sess.notes}"</p>` : ''}
+                                <div class="space-y-2">
+                                    ${exListHTML}
+                                </div>
+                            </div>
+                            <div class="pt-3 mt-3 border-t border-bordercolor/50 flex justify-end">
+                                <button onclick="deleteWorkoutSession('${sess.id}')" class="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1">
+                                    <i class="fa-solid fa-trash-can"></i> Delete Session
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                sectionDiv.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-bordercolor pb-3">
+                        <h4 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-tag text-primary"></i> ${tag} <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-semibold">${sessions.length} Sessions</span>
+                        </h4>
+                        <span class="text-xs text-gray-400">Scroll right to view progress <i class="fa-solid fa-arrow-right ml-1"></i></span>
+                    </div>
+                    <div class="horizontal-slider flex gap-4 overflow-x-auto pb-4 pt-1 custom-scrollbar">
+                        ${cardsHTML}
+                    </div>
+                `;
+
+                container.appendChild(sectionDiv);
+            });
+        }
+
+        function deleteWorkoutSession(sessionId) {
+            if (!confirm("Are you sure you want to delete this workout session?")) return;
+            let userData = getUserData();
+            userData.workouts = userData.workouts.filter(w => w.id !== sessionId);
+            saveUserData(userData);
+            renderProgressiveOverload();
+            showToast("Workout session deleted.");
+        }
+
+        // --- BMR & TDEE CALCULATOR ---
+        function calculateMetrics() {
+            const gender = document.getElementById('calc-gender').value;
+            const age = parseFloat(document.getElementById('calc-age').value) || 25;
+            const weight = parseFloat(document.getElementById('calc-weight').value) || 75;
+            const height = parseFloat(document.getElementById('calc-height').value) || 178;
+            const activity = parseFloat(document.getElementById('calc-activity').value) || 1.55;
+
+            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            if (gender === 'male') {
+                bmr += 5;
+            } else {
+                bmr -= 161;
+            }
+
+            const tdee = bmr * activity;
+            const cut = tdee - 500;
+            const bulk = tdee + 300;
+
+            document.getElementById('result-bmr').innerText = Math.round(bmr) + ' kcal';
+            document.getElementById('result-tdee').innerText = Math.round(tdee) + ' kcal';
+            document.getElementById('goal-cut').innerText = Math.round(cut) + ' kcal';
+            document.getElementById('goal-bulk').innerText = Math.round(bulk) + ' kcal';
+        }
+
+        // --- AI FOOD & PHOTO MACRO CALCULATOR ---
+        function handleMealImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageBase64 = e.target.result;
+                document.getElementById('upload-placeholder').classList.add('hidden');
+                const previewContainer = document.getElementById('upload-preview-container');
+                previewContainer.classList.remove('hidden');
+                document.getElementById('upload-preview-img').src = uploadedImageBase64;
+                showToast("Food photo attached!");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function analyzeMealWithAI() {
+            const promptText = document.getElementById('ai-food-prompt').value.trim();
+            if (!promptText && !uploadedImageBase64) {
+                showToast("Please enter a meal description or upload a photo.", "error");
+                return;
+            }
+
+            document.getElementById('ai-empty-state').classList.add('hidden');
+            document.getElementById('ai-result-content').classList.add('hidden');
+            document.getElementById('ai-loading-state').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('ai-loading-state').classList.add('hidden');
+                
+                let itemName = promptText || "Scanned Meal Photo";
+                if (itemName.length > 35) itemName = itemName.substring(0, 32) + '...';
+
+                let cals = 520, p = 42, c = 48, f = 16;
+                const lower = itemName.toLowerCase();
+                if (lower.includes('salad') || lower.includes('veg')) {
+                    cals = 280; p = 15; c = 22; f = 12;
+                } else if (lower.includes('chicken') || lower.includes('steak') || lower.includes('meat')) {
+                    cals = 610; p = 55; c = 45; f = 18;
+                } else if (lower.includes('egg') || lower.includes('breakfast')) {
+                    cals = 390; p = 24; c = 12; f = 22;
+                }
+
+                currentScannedItem = {
+                    id: 'food_' + Date.now(),
+                    name: itemName,
+                    grams: 350,
+                    baseCals: cals,
+                    baseP: p,
+                    baseC: c,
+                    baseF: f,
+                    cals: cals,
+                    protein: p,
+                    carbs: c,
+                    fats: f
+                };
+
+                document.getElementById('ai-res-name').innerText = currentScannedItem.name;
+                document.getElementById('ai-res-cals').innerText = Math.round(currentScannedItem.cals) + ' kcal';
+                document.getElementById('ai-res-protein').innerText = Math.round(currentScannedItem.protein) + 'g';
+                document.getElementById('ai-res-carbs').innerText = Math.round(currentScannedItem.carbs) + 'g';
+                document.getElementById('ai-res-fats').innerText = Math.round(currentScannedItem.fats) + 'g';
+
+                document.getElementById('ai-result-content').classList.remove('hidden');
+                showToast("Gemini AI analyzed macros successfully!");
+            }, 1200);
+        }
+
+        function logScannedMealToDaily() {
+            if (!currentScannedItem) return;
+
+            let userData = getUserData();
+            if (!userData.foodLogs) userData.foodLogs = [];
+            userData.foodLogs.push(currentScannedItem);
+            saveUserData(userData);
+
+            currentScannedItem = null;
+            document.getElementById('ai-result-content').classList.add('hidden');
+            document.getElementById('ai-empty-state').classList.remove('hidden');
+            document.getElementById('ai-food-prompt').value = '';
+            document.getElementById('upload-preview-container').classList.add('hidden');
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            uploadedImageBase64 = null;
+
+            renderDailyFoodLog();
+            showToast("Added meal to today's nutrition log!");
+        }
+
+        function renderDailyFoodLog() {
+            let userData = getUserData();
+            let logs = userData.foodLogs || [];
+
+            const listContainer = document.getElementById('daily-food-list');
+            listContainer.innerHTML = '';
+
+            let totalCals = 0, totalP = 0, totalC = 0, totalF = 0;
+
+            if (logs.length === 0) {
+                listContainer.innerHTML = `<div class="text-center py-6 text-gray-500 text-xs">No food items logged today yet.</div>`;
+            } else {
+                logs.forEach(item => {
+                    totalCals += item.cals;
+                    totalP += item.protein;
+                    totalC += item.carbs;
+                    totalF += item.fats;
+
+                    const div = document.createElement('div');
+                    div.className = "bg-darkbg border border-bordercolor p-3 rounded-xl flex items-center justify-between gap-3 text-xs";
+                    div.innerHTML = `
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-white truncate">${item.name}</div>
+                            <div class="text-gray-400 mt-0.5">
+                                <span class="text-primary font-semibold">${Math.round(item.cals)} kcal</span> | P:${Math.round(item.protein)}g C:${Math.round(item.carbs)}g F:${Math.round(item.fats)}g
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <div class="flex items-center gap-1">
+                                <span class="text-gray-500 text-[10px]">g:</span>
+                                <input type="number" value="${item.grams}" onchange="updateFoodItemGrams('${item.id}', this.value)" class="w-14 bg-cardbg border border-bordercolor rounded px-1.5 py-1 text-center text-xs text-white focus:outline-none focus:border-primary">
+                            </div>
+                            <button onclick="deleteFoodItem('${item.id}')" class="text-gray-500 hover:text-red-400 p-1 transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                    listContainer.appendChild(div);
+                });
+            }
+
+            document.getElementById('daily-total-cals').innerText = Math.round(totalCals);
+            document.getElementById('daily-total-protein').innerText = Math.round(totalP) + 'g';
+            document.getElementById('daily-total-carbs').innerText = Math.round(totalC) + 'g';
+            document.getElementById('daily-total-fats').innerText = Math.round(totalF) + 'g';
+        }
+
+        function updateFoodItemGrams(itemId, newGrams) {
+            const grams = parseFloat(newGrams) || 100;
+            let userData = getUserData();
+            let item = (userData.foodLogs || []).find(i => i.id === itemId);
+            if (item) {
+                item.grams = grams;
+                item.cals = Math.round(item.baseCals * (grams / 100));
+                item.protein = Math.round(item.baseP * (grams / 100));
+                item.carbs = Math.round(item.baseC * (grams / 100));
+                item.fats = Math.round(item.baseF * (grams / 100));
+                saveUserData(userData);
+                renderDailyFoodLog();
+            }
+        }
+
+        function deleteFoodItem(itemId) {
+            let userData = getUserData();
+            userData.foodLogs = (userData.foodLogs || []).filter(i => i.id !== itemId);
+            saveUserData(userData);
+            renderDailyFoodLog();
+            showToast("Food item removed.");
+        }
+    </script>
+</body>
+</html>
