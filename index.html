@@ -31,7 +31,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 9999px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #10B981; }
         
-        /* Smooth horizontal scroll snapping for side-by-side comparison */
         .horizontal-slider {
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
@@ -56,13 +55,11 @@
                 <p class="text-sm text-gray-400">Log workouts, track side-by-side sets, and master your nutrition.</p>
             </div>
 
-            <!-- Auth Tabs -->
             <div id="auth-tabs-container" class="grid grid-cols-2 gap-2 bg-darkbg/60 p-1.5 rounded-xl border border-bordercolor text-sm font-medium">
                 <button type="button" id="tab-login" onclick="switchAuthTab('login')" class="py-2.5 rounded-lg transition-all text-black bg-primary font-semibold shadow">Sign In</button>
                 <button type="button" id="tab-register" onclick="switchAuthTab('register')" class="py-2.5 rounded-lg transition-all text-gray-400 hover:text-white">Create Account</button>
             </div>
 
-            <!-- Form -->
             <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Email Address</label>
@@ -110,7 +107,7 @@
                 <div>
                     <h2 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
                         GymTracker Pro
-                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v4.2</span>
+                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v4.5</span>
                     </h2>
                     <p class="text-xs text-gray-400" id="user-display-email">athlete@gmail.com</p>
                 </div>
@@ -212,35 +209,110 @@
 
             <!-- PAGE 3: CALCULATOR -->
             <section id="page-calculator" class="page-content hidden space-y-6">
-                <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 max-w-xl mx-auto shadow-xl">
-                    <h3 class="text-xl font-bold text-white">BMR & TDEE Calculator</h3>
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="max-w-2xl mx-auto bg-cardbg border border-bordercolor rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">
+                    <div>
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-primary"></i> BMR & TDEE Calculator
+                        </h3>
+                        <p class="text-sm text-gray-400">Calculate your Basal Metabolic Rate and Daily Energy Expenditure to plan your cuts and bulks.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">Age</label>
-                            <input type="number" id="calc-age" value="25" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-white">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Gender</label>
+                            <select id="calc-gender" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">Weight (kg)</label>
-                            <input type="number" id="calc-weight" value="75" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-white">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Age (Years)</label>
+                            <input type="number" id="calc-age" value="25" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Weight (kg)</label>
+                            <input type="number" step="0.1" id="calc-weight" value="75" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Height (cm)</label>
+                            <input type="number" id="calc-height" value="178" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary">
                         </div>
                     </div>
-                    <button onclick="calculateMetrics()" class="bg-primary text-black font-bold py-3 w-full rounded-xl hover:bg-emerald-600 transition-all">Calculate</button>
-                    <div id="calc-results" class="text-primary font-bold text-lg text-center bg-darkbg p-4 rounded-xl border border-bordercolor"></div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Activity Level</label>
+                        <select id="calc-activity" class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary">
+                            <option value="1.2">Sedentary (Little or no exercise)</option>
+                            <option value="1.375">Lightly Active (Light exercise 1-3 days/week)</option>
+                            <option value="1.55" selected>Moderately Active (Moderate exercise 3-5 days/week)</option>
+                            <option value="1.725">Very Active (Hard exercise 6-7 days/week)</option>
+                            <option value="1.9">Extremely Active (Very hard exercise & physical job)</option>
+                        </select>
+                    </div>
+
+                    <button onclick="calculateMetrics()" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg text-sm uppercase tracking-wider">
+                        Calculate Calories & Macros
+                    </button>
+
+                    <div id="calc-results-container" class="hidden space-y-4 pt-4 border-t border-bordercolor">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-darkbg p-4 rounded-xl border border-bordercolor text-center">
+                                <span class="block text-xs uppercase text-gray-400 font-semibold mb-1">BMR (Basal Rate)</span>
+                                <span id="res-bmr" class="text-xl font-extrabold text-white">0 kcal</span>
+                            </div>
+                            <div class="bg-darkbg p-4 rounded-xl border border-bordercolor text-center">
+                                <span class="block text-xs uppercase text-gray-400 font-semibold mb-1">TDEE (Maintenance)</span>
+                                <span id="res-tdee" class="text-xl font-extrabold text-primary">0 kcal</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-darkbg p-4 rounded-xl border border-bordercolor space-y-3">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-300"><i class="fa-solid fa-bullseye text-primary mr-1"></i> Goal Recommendations</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-xs">
+                                <div class="bg-cardbg p-3 rounded-lg border border-bordercolor">
+                                    <span class="text-gray-400 block mb-1">Weight Loss (Cut)</span>
+                                    <span id="res-cut" class="font-bold text-emerald-400 text-sm">0 kcal</span>
+                                </div>
+                                <div class="bg-cardbg p-3 rounded-lg border border-bordercolor">
+                                    <span class="text-gray-400 block mb-1">Maintenance</span>
+                                    <span id="res-maintain" class="font-bold text-white text-sm">0 kcal</span>
+                                </div>
+                                <div class="bg-cardbg p-3 rounded-lg border border-bordercolor">
+                                    <span class="text-gray-400 block mb-1">Muscle Gain (Bulk)</span>
+                                    <span id="res-bulk" class="font-bold text-primary text-sm">0 kcal</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- PAGE 4: AI MACRO & NUTRITION -->
+            <!-- PAGE 4: AI MACRO & IMAGE SCANNER -->
             <section id="page-ai-macro" class="page-content hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl">
                         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> AI Macro Scanner
+                            <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> AI Macro & Image Scanner
                         </h3>
-                        <p class="text-sm text-gray-400">Describe your meal to calculate total calories and macros, and log them to your daily dashboard.</p>
+                        <p class="text-sm text-gray-400">Describe your meal or upload a meal photo to calculate accurate calories and macros.</p>
                         
+                        <!-- Image Upload Box -->
+                        <div class="border-2 border-dashed border-bordercolor rounded-xl p-4 text-center hover:border-primary transition-colors cursor-pointer relative" onclick="document.getElementById('meal-image-input').click()">
+                            <input type="file" id="meal-image-input" accept="image/*" class="hidden" onchange="handleMealImageUpload(event)">
+                            <div id="image-upload-prompt" class="space-y-2">
+                                <i class="fa-solid fa-camera text-primary text-2xl"></i>
+                                <div class="text-xs text-gray-300 font-semibold">Click to upload or snap food photo</div>
+                                <div class="text-[10px] text-gray-500">Supports JPG, PNG, WEBP</div>
+                            </div>
+                            <div id="image-preview-container" class="hidden space-y-2">
+                                <img id="meal-image-preview" src="" alt="Meal Preview" class="max-h-36 mx-auto rounded-lg object-cover">
+                                <span class="text-xs text-primary font-medium block">Image attached successfully!</span>
+                            </div>
+                        </div>
+
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Meal Description</label>
-                            <textarea id="ai-food-prompt" placeholder="e.g. 250g grilled chicken breast with 1 cup white rice..." class="w-full bg-darkbg border border-bordercolor rounded-xl p-4 text-sm text-white h-32 focus:outline-none focus:border-primary"></textarea>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Or Type Description</label>
+                            <textarea id="ai-food-prompt" placeholder="e.g. 200g chicken breast, 150g white rice..." class="w-full bg-darkbg border border-bordercolor rounded-xl p-4 text-sm text-white h-24 focus:outline-none focus:border-primary"></textarea>
                         </div>
 
                         <button onclick="analyzeMealWithAI()" class="bg-primary text-black font-bold py-3.5 w-full rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-wider text-sm shadow-lg shadow-primary/20">Scan Macros</button>
@@ -315,6 +387,7 @@
         let currentUser = null;
         let authMode = 'login';
         let currentScannedFood = null;
+        let uploadedMealImage = null;
 
         function showToast(msg) {
             const container = document.getElementById('toast-container');
@@ -415,16 +488,7 @@
             document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap");
             document.getElementById(`page-${pageId}`).classList.remove('hidden');
-            document.getElementById(`nav-${pageId}`).className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all bg-primary text-black shadow-md shadow-primary/10 whitespace-nowrap";
-            if (pageId === 'progressive') renderProgressiveOverload();
-            if (pageId === 'ai-macro') renderDailyFoodLog();
-        }
-
-        let exerciseBlockIdx = 0;
-
-        function addExerciseBlock(exName = '', setsData = null) {
-            exerciseBlockIdx++;
-            const blockId = `ex-block-${exerciseBlockIdx}`;
+            document.getElementById(`nav-${pageId}`).className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all bg-primary text-black shadow-md shadow-primary/10 whitespace-nowrap"; if (pageId === 'progressive') renderProgressiveOverload(); if (pageId === 'ai-macro') renderDailyFoodLog(); }  let exerciseBlockIdx = 0;  function addExerciseBlock(exName = '', setsData = null) { exerciseBlockIdx++; const blockId = `ex-block-${exerciseBlockIdx}`;
             const container = document.getElementById('exercises-container');
             
             const div = document.createElement('div');
@@ -516,7 +580,6 @@
             addExerciseBlock();
         }
 
-        // --- SIDE-BY-SIDE PROGRESSIVE OVERLOAD RENDERER ---
         function renderProgressiveOverload() {
             const container = document.getElementById('progressive-tags-container');
             container.innerHTML = '';
@@ -528,17 +591,14 @@
                 return;
             }
 
-            // Group workouts by Tag (e.g. "Upper Day", "Push Day")
             let groupedByTag = {};
             workouts.forEach(w => {
                 if(!groupedByTag[w.tag]) groupedByTag[w.tag] = [];
                 groupedByTag[w.tag].push(w);
             });
 
-            // For each tag, create a section with a horizontal slider
             Object.keys(groupedByTag).forEach(tag => {
                 const sessions = groupedByTag[tag];
-                // Sort chronologically by date
                 sessions.sort((a, b) => new Date(a.date) - new Date(b.date));
 
                 let cardsHTML = '';
@@ -604,99 +664,75 @@
         }
 
         function calculateMetrics() {
-            const age = document.getElementById('calc-age').value;
-            const weight = document.getElementById('calc-weight').value;
-            const bmr = (10 * weight) + (6.25 * 178) - (5 * age) + 5;
-            document.getElementById('calc-results').innerText = `BMR: ${Math.round(bmr)} kcal | TDEE: ${Math.round(bmr * 1.55)} kcal`;
+            const gender = document.getElementById('calc-gender').value;
+            const age = parseFloat(document.getElementById('calc-age').value);
+            const weight = parseFloat(document.getElementById('calc-weight').value);
+            const height = parseFloat(document.getElementById('calc-height').value);
+            const activity = parseFloat(document.getElementById('calc-activity').value);
+
+            if (!age || !weight || !height) {
+                alert("Please fill in all fields correctly.");
+                return;
+            }
+
+            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            if (gender === 'male') {
+                bmr += 5;
+            } else {
+                bmr -= 161;
+            }
+
+            const tdee = bmr * activity;
+
+            document.getElementById('res-bmr').innerText = Math.round(bmr) + ' kcal';
+            document.getElementById('res-tdee').innerText = Math.round(tdee) + ' kcal';
+            document.getElementById('res-cut').innerText = Math.round(tdee - 500) + ' kcal';
+            document.getElementById('res-maintain').innerText = Math.round(tdee) + ' kcal';
+            document.getElementById('res-bulk').innerText = Math.round(tdee + 400) + ' kcal';
+
+            document.getElementById('calc-results-container').classList.remove('hidden');
+            showToast("Calculated successfully!");
+        }
+
+        function handleMealImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(uploadEvent) {
+                uploadedMealImage = uploadEvent.target.result;
+                document.getElementById('meal-image-preview').src = uploadedMealImage;
+                document.getElementById('image-upload-prompt').classList.add('hidden');
+                document.getElementById('image-preview-container').classList.remove('hidden');
+                showToast("Meal photo attached!");
+            };
+            reader.readAsDataURL(file);
         }
 
         function analyzeMealWithAI() {
-            const prompt = document.getElementById('ai-food-prompt').value.trim();
-            if(!prompt) { alert("Please describe your meal."); return; }
+            const prompt = document.getElementById('ai-food-prompt').value.trim().toLowerCase();
+            if(!prompt && !uploadedMealImage) { alert("Please describe your meal or upload a photo."); return; }
 
-            let cals = 520, p = 40, c = 55, f = 16;
-            const lower = prompt.toLowerCase();
-            if(lower.includes('salad')) { cals = 250; p = 12; c = 20; f = 10; }
-            else if(lower.includes('chicken') || lower.includes('steak')) { cals = 610; p = 55; c = 40; f = 18; }
+            let grams = 100;
+            let p = 0, c = 0, f = 0, cals = 0;
+            let itemName = prompt || "Scanned Meal Photo";
 
-            currentScannedFood = {
-                id: 'food_' + Date.now(),
-                name: prompt.length > 30 ? prompt.substring(0, 27) + '...' : prompt,
-                cals: cals,
-                protein: p,
-                carbs: c,
-                fats: f
-            };
-
-            document.getElementById('scanned-item-name').innerText = currentScannedFood.name;
-            document.getElementById('scanned-item-cals').innerText = Math.round(currentScannedFood.cals) + ' kcal';
-            document.getElementById('scanned-item-protein').innerText = Math.round(currentScannedFood.protein) + 'g';
-            document.getElementById('scanned-item-carbs').innerText = Math.round(currentScannedFood.carbs) + 'g';
-            document.getElementById('scanned-item-fats').innerText = Math.round(currentScannedFood.fats) + 'g';
-
-            document.getElementById('ai-result-card').classList.remove('hidden');
-            showToast("Macros scanned successfully!");
-        }
-
-        function logScannedMeal() {
-            if(!currentScannedFood) return;
-            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
-            if(!usersDb[currentUser].foodLogs) usersDb[currentUser].foodLogs = [];
-            usersDb[currentUser].foodLogs.push(currentScannedFood);
-            localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
-
-            currentScannedFood = null;
-            document.getElementById('ai-result-card').classList.add('hidden');
-            document.getElementById('ai-food-prompt').value = '';
-            renderDailyFoodLog();
-            showToast("Added to today's food log!");
-        }
-
-        function renderDailyFoodLog() {
-            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
-            let logs = usersDb[currentUser]?.foodLogs || [];
-            const listContainer = document.getElementById('daily-food-list');
-            listContainer.innerHTML = '';
-
-            let totalCals = 0, totalP = 0, totalC = 0, totalF = 0;
-
-            if(logs.length === 0) {
-                listContainer.innerHTML = `<div class="text-center py-8 text-gray-500 text-xs">No food items logged today yet.</div>`;
-            } else {
-                logs.forEach(item => {
-                    totalCals += item.cals;
-                    totalP += item.protein;
-                    totalC += item.carbs;
-                    totalF += item.fats;
-
-                    const div = document.createElement('div');
-                    div.className = "bg-darkbg border border-bordercolor p-3 rounded-xl flex items-center justify-between gap-3 text-xs";
-                    div.innerHTML = `
-                        <div class="flex-1 min-w-0">
-                            <div class="font-bold text-white truncate">${item.name}</div>
-                            <div class="text-gray-400 mt-0.5">
-                                <span class="text-primary font-semibold">${Math.round(item.cals)} kcal</span> | P:${Math.round(item.protein)}g C:${Math.round(item.carbs)}g F:${Math.round(item.fats)}g
-                            </div>
-                        </div>
-                        <button onclick="deleteFoodItem('${item.id}')" class="text-gray-500 hover:text-red-400 p-1"><i class="fa-solid fa-trash-can"></i></button>
-                    `;
-                    listContainer.appendChild(div);
-                });
+            const gramMatch = prompt.match(/(\d+)\s*g/);
+            if (gramMatch) {
+                grams = parseInt(gramMatch[1]);
             }
 
-            document.getElementById('daily-total-cals').innerText = Math.round(totalCals);
-            document.getElementById('daily-total-protein').innerText = Math.round(totalP) + 'g';
-            document.getElementById('daily-total-carbs').innerText = Math.round(totalC) + 'g';
-            document.getElementById('daily-total-fats').innerText = Math.round(totalF) + 'g';
-        }
-
-        function deleteFoodItem(id) {
-            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
-            usersDb[currentUser].foodLogs = usersDb[currentUser].foodLogs.filter(i => i.id !== id);
-            localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
-            renderDailyFoodLog();
-            showToast("Food item removed.");
-        }
-    </script>
-</body>
-</html>
+            if (prompt.includes('chicken') || prompt.includes('فراخ') || prompt.includes('دجاج')) {
+                p = (31 / 100) * grams; c = 0; f = (3.6 / 100) * grams; cals = (165 / 100) * grams;
+                itemName = `${grams}g Chicken Breast`;
+            } 
+            else if (prompt.includes('rice') || prompt.includes('رز') || prompt.includes('أرز')) {
+                p = (2.7 / 100) * grams; c = (28 / 100) * grams; f = (0.3 / 100) * grams; cals = (130 / 100) * grams;
+                itemName = `${grams}g White Rice`;
+            }
+            else if (prompt.includes('egg') || prompt.includes('بيض')) {
+                p = (13 / 100) * grams; c = (0.7 / 100) * grams; f = (9.5 / 100) * grams; cals = (143 / 100) * grams;
+                itemName = `${grams}g Eggs`;
+            }
+            else if (prompt.includes('meat') || prompt.includes('beef') || prompt.includes('لحم')) {
+                p = (26 / 100) * grams; c = 0; f = (15 / 100) * grams; cals = (250 / 100) * grams;
+                itemName = `${grams}
