@@ -12,7 +12,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#10B981', // Emerald green theme
+                        primary: '#10B981',
                         darkbg: '#0B0F19',
                         cardbg: '#1F2937',
                         bordercolor: '#374151'
@@ -23,28 +23,18 @@
     </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #111827; border-radius: 9999px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 9999px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #10B981; }
-        
-        /* Smooth horizontal scroll snapping */
-        .horizontal-slider {
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-        }
-        .horizontal-slider > div {
-            scroll-snap-align: start;
-        }
+        .horizontal-slider { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+        .horizontal-slider > div { scroll-snap-align: start; }
     </style>
 </head>
 <body class="bg-darkbg text-gray-100 min-h-screen flex flex-col selection:bg-primary selection:text-black">
 
-    <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- AUTHENTICATION VIEW -->
@@ -74,25 +64,14 @@
                     </div>
                 </div>
                 
-                <div id="password-field-container">
+                <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Password</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-lock"></i></span>
-                        <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-darkbg border border-bordercolor rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors">
+                        <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-darkbg border border-bordercolor rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors">
                     </div>
                     <div class="flex justify-end mt-1">
-                        <button type="button" onclick="switchAuthMode('forgot')" class="text-xs text-primary hover:underline">Forgot password?</button>
-                    </div>
-                </div>
-
-                <!-- Reset Password New Password Fields (Hidden by default) -->
-                <div id="new-password-field-container" class="hidden space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">New Password</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-lock-open"></i></span>
-                            <input type="password" id="auth-new-password" placeholder="Enter new password" class="w-full bg-darkbg border border-bordercolor rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors">
-                        </div>
+                        <button type="button" onclick="triggerForgotPassword()" class="text-xs text-primary hover:underline">Forgot password?</button>
                     </div>
                 </div>
 
@@ -101,19 +80,10 @@
                     <span id="auth-error-text">Error message</span>
                 </div>
 
-                <div id="auth-success-box" class="hidden p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium flex items-center gap-2">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span id="auth-success-text">Success message</span>
-                </div>
-
                 <button type="submit" id="auth-submit-btn" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
                     <span id="auth-btn-text">Sign In</span>
                     <i class="fa-solid fa-arrow-right-long"></i>
                 </button>
-
-                <div id="back-to-login-container" class="hidden text-center pt-2">
-                    <button type="button" onclick="switchAuthMode('login')" class="text-xs text-gray-400 hover:text-white underline">Back to Sign In</button>
-                </div>
             </form>
 
             <div class="text-center text-xs text-gray-500">
@@ -122,9 +92,8 @@
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER (Hidden until logged in) -->
+    <!-- MAIN APP WRAPPER -->
     <div id="app-wrapper" class="hidden flex-1 flex flex-col min-h-screen">
-        <!-- Top Navbar -->
         <header class="sticky top-0 z-30 bg-darkbg/80 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shadow">
@@ -133,12 +102,11 @@
                 <div>
                     <h2 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
                         GymTracker Pro
-                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v3.2</span>
+                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v3.0</span>
                     </h2>
                     <p class="text-xs text-gray-400" id="user-display-email">athlete@gmail.com</p>
                 </div>
             </div>
-            
             <div class="flex items-center gap-3">
                 <button onclick="logout()" class="flex items-center gap-2 bg-darkbg hover:bg-red-500/10 text-gray-300 hover:text-red-400 border border-bordercolor hover:border-red-500/30 px-4 py-2 rounded-xl text-sm font-medium transition-all">
                     <i class="fa-solid fa-right-from-bracket"></i>
@@ -147,55 +115,304 @@
             </div>
         </header>
 
-        <!-- Navigation Tabs Bar -->
         <nav class="bg-cardbg/50 border-b border-bordercolor px-6 py-2 overflow-x-auto flex gap-2 custom-scrollbar">
             <button onclick="switchPage('training')" id="nav-training" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all bg-primary text-black shadow-md shadow-primary/10 whitespace-nowrap">
-                <i class="fa-solid fa-dumbbell"></i>
-                Workout Log
+                <i class="fa-solid fa-dumbbell"></i> Workout Log
             </button>
             <button onclick="switchPage('progressive')" id="nav-progressive" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap">
-                <i class="fa-solid fa-chart-line"></i>
-                Progressive Overload (Side-by-Side)
+                <i class="fa-solid fa-chart-line"></i> Progressive Overload
             </button>
             <button onclick="switchPage('calculator')" id="nav-calculator" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap">
-                <i class="fa-solid fa-calculator"></i>
-                BMR & TDEE Calculator
+                <i class="fa-solid fa-calculator"></i> BMR & TDEE Calculator
             </button>
             <button onclick="switchPage('ai-macro')" id="nav-ai-macro" class="nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap">
-                <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
-                AI Macro & Food Scanner
+                <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> AI Macro Scanner
             </button>
         </nav>
 
-        <!-- Main Content Area -->
         <main class="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full">
-
-            <!-- PAGE 1: WORKOUT LOG -->
+            <!-- PAGE 1: WORKOUT -->
             <section id="page-training" class="page-content space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-cardbg/40 border border-bordercolor p-6 rounded-2xl">
                     <div>
                         <h3 class="text-xl font-bold text-white flex items-center gap-2">
                             <i class="fa-solid fa-clipboard-list text-primary"></i> Log Workout Session
                         </h3>
-                        <p class="text-sm text-gray-400">Select your split tag, add exercises with sets, reps, and weights, then save.</p>
+                        <p class="text-sm text-gray-400">Select split tag, add exercises, and save.</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <label class="text-xs uppercase font-bold text-gray-400">Workout Date:</label>
+                        <label class="text-xs uppercase font-bold text-gray-400">Date:</label>
                         <input type="date" id="workout-date" class="bg-darkbg border border-bordercolor rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Left: Form Editor -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Split / Workout Tag</label>
-                                    <select id="workout-tag" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
-                                        <option value="Upper Day">Upper Day</option>
-                                        <option value="Lower Day">Lower Day</option>
-                                        <option value="Push Day">Push Day</option>
-                                        <option value="Pull Day">Pull Day</option>
-                                        <option value="Legs Day">Legs Day</option>
-                                        <option
+                    <div class="lg:col-span-2 bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6 shadow-xl">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Split Tag</label>
+                                <select id="workout-tag" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                                    <option value="Upper Day">Upper Day</option>
+                                    <option value="Lower Day">Lower Day</option>
+                                    <option value="Push Day">Push Day</option>
+                                    <option value="Pull Day">Pull Day</option>
+                                    <option value="Legs Day">Legs Day</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Notes</label>
+                                <input type="text" id="workout-notes" placeholder="Great session!" class="w-full bg-darkbg border border-bordercolor rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary">
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300">Exercises</h4>
+                                <button type="button" onclick="addExerciseRow()" class="bg-primary/10 text-primary border border-primary/30 px-3 py-1.5 rounded-xl text-xs font-semibold">Add Exercise</button>
+                            </div>
+                            <div id="exercises-container" class="space-y-3"></div>
+                        </div>
+
+                        <button type="button" onclick="saveWorkoutSession()" class="w-full bg-primary hover:bg-emerald-600 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg text-sm uppercase">Save Workout</button>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-4 shadow-xl">
+                            <h4 class="text-sm font-bold uppercase tracking-wider text-gray-300"><i class="fa-solid fa-bolt text-primary"></i> Templates</h4>
+                            <div class="grid grid-cols-1 gap-2">
+                                <button type="button" onclick="loadTemplate('Upper Day')" class="w-full text-left bg-darkbg border border-bordercolor p-3 rounded-xl text-sm text-white hover:text-primary">Upper Day Template</button>
+                                <button type="button" onclick="loadTemplate('Push Day')" class="w-full text-left bg-darkbg border border-bordercolor p-3 rounded-xl text-sm text-white hover:text-primary">Push Day Template</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 2: PROGRESSIVE OVERLOAD -->
+            <section id="page-progressive" class="page-content hidden space-y-6">
+                <div class="bg-cardbg/40 border border-bordercolor p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-chart-line text-primary"></i> Progressive Overload</h3>
+                    <p class="text-sm text-gray-400">View your workout history side-by-side.</p>
+                </div>
+                <div id="progressive-tags-container" class="space-y-8"></div>
+            </section>
+
+            <!-- PAGE 3: CALCULATOR -->
+            <section id="page-calculator" class="page-content hidden space-y-6">
+                <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6">
+                    <h3 class="text-xl font-bold text-white">BMR & TDEE Calculator</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="number" id="calc-age" value="25" placeholder="Age" class="bg-darkbg border border-bordercolor rounded-xl p-3 text-white">
+                        <input type="number" id="calc-weight" value="75" placeholder="Weight (kg)" class="bg-darkbg border border-bordercolor rounded-xl p-3 text-white">
+                    </div>
+                    <button onclick="calculateMetrics()" class="bg-primary text-black font-bold py-3 w-full rounded-xl">Calculate</button>
+                    <div id="calc-results" class="text-primary font-bold text-lg"></div>
+                </div>
+            </section>
+
+            <!-- PAGE 4: AI MACRO -->
+            <section id="page-ai-macro" class="page-content hidden space-y-6">
+                <div class="bg-cardbg border border-bordercolor rounded-2xl p-6 space-y-6">
+                    <h3 class="text-xl font-bold text-white">AI Macro Scanner</h3>
+                    <textarea id="ai-food-prompt" placeholder="Describe your meal..." class="w-full bg-darkbg border border-bordercolor rounded-xl p-3 text-white"></textarea>
+                    <button onclick="analyzeMealWithAI()" class="bg-primary text-black font-bold py-3 w-full rounded-xl">Scan Meal</button>
+                    <div id="ai-result-content" class="hidden text-white font-semibold"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let authMode = 'login';
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = "bg-cardbg border border-primary/40 text-white px-4 py-2 rounded-xl text-sm shadow-xl";
+            t.innerText = msg;
+            container.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        function switchAuthTab(mode) {
+            authMode = mode;
+            const loginBtn = document.getElementById('tab-login');
+            const regBtn = document.getElementById('tab-register');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            if (mode === 'login') {
+                loginBtn.className = "py-2.5 rounded-lg transition-all text-black bg-primary font-semibold shadow";
+                regBtn.className = "py-2.5 rounded-lg transition-all text-gray-400 hover:text-white";
+                submitBtn.querySelector('span').innerText = "Sign In";
+            } else {
+                regBtn.className = "py-2.5 rounded-lg transition-all text-black bg-primary font-semibold shadow";
+                loginBtn.className = "py-2.5 rounded-lg transition-all text-gray-400 hover:text-white";
+                submitBtn.querySelector('span').innerText = "Create Account";
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim().toLowerCase();
+            const password = document.getElementById('auth-password').value;
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+
+            if (authMode === 'register') {
+                if (usersDb[email]) {
+                    alert("Account already exists!");
+                    return;
+                }
+                usersDb[email] = { password, workouts: [], foodLogs: [] };
+                localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
+                showToast("Account created successfully!");
+            } else {
+                if (!usersDb[email] || usersDb[email].password !== password) {
+                    alert("Invalid email or password!");
+                    return;
+                }
+            }
+
+            currentUser = email;
+            localStorage.setItem('gym_current_session', currentUser);
+            initAppSession();
+        }
+
+        function triggerForgotPassword() {
+            const email = prompt("Enter your account email for password reset:");
+            if (!email) return;
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            if (usersDb[email]) {
+                const newPass = prompt("Enter your new password:");
+                if (newPass) {
+                    usersDb[email].password = newPass;
+                    localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
+                    showToast("Password updated successfully!");
+                }
+            } else {
+                alert("Email not found.");
+            }
+        }
+
+        function initAppSession() {
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('app-wrapper').classList.remove('hidden');
+            document.getElementById('user-display-email').innerText = currentUser;
+            document.getElementById('workout-date').value = new Date().toISOString().split('T')[0];
+            if(document.getElementById('exercises-container').children.length === 0) addExerciseRow();
+            switchPage('training');
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('gym_current_session');
+            document.getElementById('app-wrapper').classList.add('hidden');
+            document.getElementById('auth-view').classList.remove('hidden');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('gym_current_session');
+            if (saved) {
+                let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+                if (usersDb[saved]) {
+                    currentUser = saved;
+                    initAppSession();
+                }
+            }
+        });
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap");
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            document.getElementById(`nav-${pageId}`).className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all bg-primary text-black shadow-md shadow-primary/10 whitespace-nowrap";
+            if (pageId === 'progressive') renderProgressiveOverload();
+        }
+
+        let rowIdx = 0;
+        function addExerciseRow(name='', sets='', reps='', weight='') {
+            rowIdx++;
+            const container = document.getElementById('exercises-container');
+            const div = document.createElement('div');
+            div.id = `row-${rowIdx}`;
+            div.className = "flex gap-2 items-center bg-darkbg p-3 rounded-xl border border-bordercolor";
+            div.innerHTML = `
+                <input type="text" placeholder="Exercise Name" value="${name}" class="ex-name flex-1 bg-cardbg border border-bordercolor rounded-lg p-2 text-sm text-white">
+                <input type="number" placeholder="Sets" value="${sets}" class="ex-sets w-16 bg-cardbg border border-bordercolor rounded-lg p-2 text-sm text-center text-white">
+                <input type="number" placeholder="Reps" value="${reps}" class="ex-reps w-16 bg-cardbg border border-bordercolor rounded-lg p-2 text-sm text-center text-white">
+                <input type="number" step="0.5" placeholder="Kg" value="${weight}" class="ex-weight w-20 bg-cardbg border border-bordercolor rounded-lg p-2 text-sm text-center text-white">
+                <button type="button" onclick="document.getElementById('row-${rowIdx}').remove()" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function loadTemplate(type) {
+            document.getElementById('exercises-container').innerHTML = '';
+            document.getElementById('workout-tag').value = type;
+            if(type === 'Upper Day') {
+                addExerciseRow('Bench Press', 3, 8, 80);
+                addExerciseRow('Barbell Row', 3, 10, 70);
+            } else {
+                addExerciseRow('Incline Press', 3, 10, 30);
+                addExerciseRow('Lateral Raise', 4, 15, 12);
+            }
+        }
+
+        function saveWorkoutSession() {
+            const tag = document.getElementById('workout-tag').value;
+            const date = document.getElementById('workout-date').value;
+            const notes = document.getElementById('workout-notes').value;
+            let exercises = [];
+            document.querySelectorAll('#exercises-container > div').forEach(r => {
+                exercises.push({
+                    name: r.querySelector('.ex-name').value,
+                    sets: r.querySelector('.ex-sets').value || 3,
+                    reps: r.querySelector('.ex-reps').value || 10,
+                    weight: r.querySelector('.ex-weight').value || 0
+                });
+            });
+            if(exercises.length === 0) { alert("Add at least one exercise"); return; }
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            usersDb[currentUser].workouts.push({ id: Date.now(), tag, date, notes, exercises });
+            localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
+            showToast("Workout saved!");
+            document.getElementById('exercises-container').innerHTML = '';
+            addExerciseRow();
+        }
+
+        function renderProgressiveOverload() {
+            const container = document.getElementById('progressive-tags-container');
+            container.innerHTML = '';
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            let workouts = usersDb[currentUser]?.workouts || [];
+            if(workouts.length === 0) {
+                container.innerHTML = `<div class="text-gray-400 text-center p-6">No workouts logged yet.</div>`;
+                return;
+            }
+            workouts.forEach(w => {
+                let d = document.createElement('div');
+                d.className = "bg-cardbg border border-bordercolor p-4 rounded-xl space-y-2";
+                d.innerHTML = `<h4 class="text-primary font-bold">${w.tag} - ${w.date}</h4><p class="text-sm text-gray-400">${w.notes || ''}</p>`;
+                w.exercises.forEach(e => {
+                    d.innerHTML += `<div class="text-xs bg-darkbg p-2 rounded">${e.name}: ${e.sets} sets x ${e.reps} reps @ ${e.weight}kg</div>`;
+                });
+                container.appendChild(d);
+            });
+        }
+
+        function calculateMetrics() {
+            const age = document.getElementById('calc-age').value;
+            const weight = document.getElementById('calc-weight').value;
+            const bmr = (10 * weight) + (6.25 * 178) - (5 * age) + 5;
+            document.getElementById('calc-results').innerText = `BMR: ${Math.round(bmr)} kcal | TDEE: ${Math.round(bmr * 1.55)} kcal`;
+        }
+
+        function analyzeMealWithAI() {
+            const p = document.getElementById('ai-food-prompt').value;
+            if(!p) return;
+            document.getElementById('ai-result-content').classList.remove('hidden');
+            document.getElementById('ai-result-content').innerText = `Estimated for "${p}": ~450 kcal | 35g P | 40g C | 12g F`;
+        }
+    </script>
+</body>
+</html>
