@@ -107,7 +107,7 @@
                 <div>
                     <h2 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
                         GymTracker Pro
-                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v4.5</span>
+                        <span class="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">v4.6</span>
                     </h2>
                     <p class="text-xs text-gray-400" id="user-display-email">athlete@gmail.com</p>
                 </div>
@@ -415,15 +415,29 @@
             }
         }
 
+        // FIXED AUTH HANDLER WITH ROBUST REGISTRATION & ERROR HANDLING
         function handleAuthSubmit(e) {
             e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim().toLowerCase();
-            const password = document.getElementById('auth-password').value;
+            const emailInput = document.getElementById('auth-email');
+            const passwordInput = document.getElementById('auth-password');
+            const errorBox = document.getElementById('auth-error-box');
+            const errorText = document.getElementById('auth-error-text');
+
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                errorText.innerText = "Please fill in all fields.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
             let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
 
             if (authMode === 'register') {
                 if (usersDb[email]) {
-                    alert("Account already exists!");
+                    errorText.innerText = "Account already exists! Please sign in.";
+                    errorBox.classList.remove('hidden');
                     return;
                 }
                 usersDb[email] = { password, workouts: [], foodLogs: [] };
@@ -431,11 +445,13 @@
                 showToast("Account created successfully!");
             } else {
                 if (!usersDb[email] || usersDb[email].password !== password) {
-                    alert("Invalid email or password!");
+                    errorText.innerText = "Invalid email or password!";
+                    errorBox.classList.remove('hidden');
                     return;
                 }
             }
 
+            errorBox.classList.add('hidden');
             currentUser = email;
             localStorage.setItem('gym_current_session', currentUser);
             initAppSession();
@@ -488,7 +504,16 @@
             document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-gray-400 hover:text-white hover:bg-darkbg/50 whitespace-nowrap");
             document.getElementById(`page-${pageId}`).classList.remove('hidden');
-            document.getElementById(`nav-${pageId}`).className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all bg-primary text-black shadow-md shadow-primary/10 whitespace-nowrap"; if (pageId === 'progressive') renderProgressiveOverload(); if (pageId === 'ai-macro') renderDailyFoodLog(); }  let exerciseBlockIdx = 0;  function addExerciseBlock(exName = '', setsData = null) { exerciseBlockIdx++; const blockId = `ex-block-${exerciseBlockIdx}`;
+            document.getElementById(`nav-${pageId}`).className = "nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all bg-primary text-black shadow-md shadow-primary/10 whitespace-nowrap";
+            if (pageId === 'progressive') renderProgressiveOverload();
+            if (pageId === 'ai-macro') renderDailyFoodLog();
+        }
+
+        let exerciseBlockIdx = 0;
+
+        function addExerciseBlock(exName = '', setsData = null) {
+            exerciseBlockIdx++;
+            const blockId = `ex-block-${exerciseBlockIdx}`;
             const container = document.getElementById('exercises-container');
             
             const div = document.createElement('div');
@@ -571,6 +596,7 @@
             if(exercises.length === 0) { alert("Please add at least one exercise with sets."); return; }
             
             let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            if(!usersDb[currentUser].workouts) usersDb[currentUser].workouts = [];
             usersDb[currentUser].workouts.push({ id: Date.now(), tag, date, notes, exercises });
             localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
             showToast("Workout session saved successfully!");
@@ -735,4 +761,101 @@
             }
             else if (prompt.includes('meat') || prompt.includes('beef') || prompt.includes('لحم')) {
                 p = (26 / 100) * grams; c = 0; f = (15 / 100) * grams; cals = (250 / 100) * grams;
-                itemName = `${grams}
+                itemName = `${grams}g Lean Beef`;
+            }
+            else if (prompt.includes('oats') || prompt.includes('شوفان')) {
+                p = (16.9 / 100) * grams; c = (66 / 100) * grams; f = (6.9 / 100) * grams; cals = (389 / 100) * grams;
+                itemName = `${grams}g Oats`;
+            }
+            else {
+                p = 35; c = 45; f = 14; cals = 480;
+                if(uploadedMealImage && !prompt) itemName = "Photo Scanned Balanced Meal";
+            }
+
+            currentScannedFood = {
+                id: 'food_' + Date.now(),
+                name: itemName,
+                cals: Math.round(cals),
+                protein: Math.round(p),
+                carbs: Math.round(c),
+                fats: Math.round(f)
+            };
+
+            document.getElementById('scanned-item-name').innerText = currentScannedFood.name;
+            document.getElementById('scanned-item-cals').innerText = currentScannedFood.cals + ' kcal';
+            document.getElementById('scanned-item-protein').innerText = currentScannedFood.protein + 'g';
+            document.getElementById('scanned-item-carbs').innerText = currentScannedFood.carbs + 'g';
+            document.getElementById('scanned-item-fats').innerText = currentScannedFood.fats + 'g';
+
+            document.getElementById('ai-result-card').classList.remove('hidden');
+            showToast("Macros calculated successfully!");
+        }
+
+        function logScannedMeal() {
+            if(!currentScannedFood) return;
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            if(!usersDb[currentUser]) usersDb[currentUser] = { workouts: [], foodLogs: [] };
+            if(!usersDb[currentUser].foodLogs) usersDb[currentUser].foodLogs = [];
+            usersDb[currentUser].foodLogs.push(currentScannedFood);
+            localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
+
+            currentScannedFood = null;
+            uploadedMealImage = null;
+            document.getElementById('ai-result-card').classList.add('hidden');
+            document.getElementById('ai-food-prompt').value = '';
+            document.getElementById('image-preview-container').classList.add('hidden');
+            document.getElementById('image-upload-prompt').classList.remove('hidden');
+            renderDailyFoodLog();
+            showToast("Added to today's food log!");
+        }
+
+        function renderDailyFoodLog() {
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            if(!usersDb[currentUser]) usersDb[currentUser] = { workouts: [], foodLogs: [] };
+            let logs = usersDb[currentUser]?.foodLogs || [];
+            const listContainer = document.getElementById('daily-food-list');
+            listContainer.innerHTML = '';
+
+            let totalCals = 0, totalP = 0, totalC = 0, totalF = 0;
+
+            if(logs.length === 0) {
+                listContainer.innerHTML = `<div class="text-center py-8 text-gray-500 text-xs">No food items logged today yet.</div>`;
+            } else {
+                logs.forEach(item => {
+                    totalCals += item.cals;
+                    totalP += item.protein;
+                    totalC += item.carbs;
+                    totalF += item.fats;
+
+                    const div = document.createElement('div');
+                    div.className = "bg-darkbg border border-bordercolor p-3 rounded-xl flex items-center justify-between gap-3 text-xs";
+                    div.innerHTML = `
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-white truncate">${item.name}</div>
+                            <div class="text-gray-400 mt-0.5">
+                                <span class="text-primary font-semibold">${Math.round(item.cals)} kcal</span> | P:${Math.round(item.protein)}g C:${Math.round(item.carbs)}g F:${Math.round(item.fats)}g
+                            </div>
+                        </div>
+                        <button onclick="deleteFoodItem('${item.id}')" class="text-gray-500 hover:text-red-400 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                    `;
+                    listContainer.appendChild(div);
+                });
+            }
+
+            document.getElementById('daily-total-cals').innerText = Math.round(totalCals);
+            document.getElementById('daily-total-protein').innerText = Math.round(totalP) + 'g';
+            document.getElementById('daily-total-carbs').innerText = Math.round(totalC) + 'g';
+            document.getElementById('daily-total-fats').innerText = Math.round(totalF) + 'g';
+        }
+
+        function deleteFoodItem(id) {
+            let usersDb = JSON.parse(localStorage.getItem('gym_users_db') || '{}');
+            if(!usersDb[currentUser]) return;
+            usersDb[currentUser].foodLogs = usersDb[currentUser].foodLogs.filter(i => i.id !== id);
+            localStorage.setItem('gym_users_db', JSON.stringify(usersDb));
+            renderDailyFoodLog();
+            showToast("Food item removed.");
+        }
+    </script>
+</body>
+</html>
